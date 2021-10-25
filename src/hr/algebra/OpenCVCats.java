@@ -44,10 +44,9 @@ public class OpenCVCats extends Application {
     }
 
     private void showMainMenu() throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("views/MainMenu.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("controllers/views/MainMenu.fxml"));
         Scene scene = new Scene(root);
         getMainStage().setScene(scene);
         getMainStage().show();
     }
-
 }
