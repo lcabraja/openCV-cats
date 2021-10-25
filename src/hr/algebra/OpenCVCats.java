@@ -6,6 +6,7 @@
 package hr.algebra;
 
 import hr.algebra.controllers.MainMenuController;
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -13,6 +14,7 @@ import javafx.stage.WindowEvent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import org.opencv.core.Core;
 
 /**
@@ -21,10 +23,14 @@ import org.opencv.core.Core;
  */
 public class OpenCVCats extends Application {
 
-    public static Stage mainStage;
+    private static Stage mainStage;
+
+    public static Stage getMainStage() {
+        return mainStage;
+    }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws IOException {
         mainStage = primaryStage;
         showMainMenu();
     }
@@ -37,32 +43,11 @@ public class OpenCVCats extends Application {
         launch(args);
     }
 
-    private void showMainMenu() {
-
-        try {
-            // load the FXML resource
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("views/MainMenu.fxml"));
-            // store the root element so that the controllers can use it
-            BorderPane rootElement = (BorderPane) loader.load();
-            // create and style a scene
-            Scene scene = new Scene(rootElement, 800, 600);
-            // create the stage with the given title and the previously created
-            // scene
-            mainStage.setTitle("JavaFX meets OpenCV");
-            mainStage.setScene(scene);
-            // show the GUI
-            mainStage.show();
-
-            // set the proper behavior on closing the application
-            MainMenuController controller = loader.getController();
-            mainStage.setOnCloseRequest((new EventHandler<WindowEvent>() {
-                public void handle(WindowEvent we) {
-                    controller.setClosed();
-                }
-            }));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void showMainMenu() throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("views/MainMenu.fxml"));
+        Scene scene = new Scene(root);
+        getMainStage().setScene(scene);
+        getMainStage().show();
     }
 
 }
