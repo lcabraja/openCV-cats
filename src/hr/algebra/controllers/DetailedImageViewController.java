@@ -146,7 +146,7 @@ public class DetailedImageViewController implements Initializable {
                 absoluteFaceSize = Math.round(height * 0.2f);
             }
         }
-        faceCascade.detectMultiScale(grayFrame, faces, 1.1, 2, 0 | Objdetect.CASCADE_SCALE_IMAGE,
+        faceCascade.detectMultiScale(grayFrame, faces, 1.1, 2, Objdetect.CASCADE_SCALE_IMAGE,
                 new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         Rect[] facesArray = faces.toArray();
         for (Rect facesArray1 : facesArray) {
