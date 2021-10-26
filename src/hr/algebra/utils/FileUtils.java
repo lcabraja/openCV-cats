@@ -5,9 +5,11 @@
  */
 package hr.algebra.utils;
 
+import hr.algebra.OpenCVCats;
 import java.io.File;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -52,6 +54,20 @@ public final class FileUtils {
 //            String extension = selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".") + 1);
 //            return Arrays.asList(extensions).contains(extension.toLowerCase()) ? Optional.of(selectedFile) : Optional.empty();            
 //        }
+        return Optional.empty();
+    }
+
+    public static Optional<File> uploadDirectory(Stage stage, String title) {
+        final DirectoryChooser directoryChooser
+                = new DirectoryChooser();
+        directoryChooser.setTitle((title == null) ? DEFAULT_FILE_TITLE : title);
+        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+
+        File selectedDirectory = directoryChooser.showDialog(stage);
+
+        if (selectedDirectory != null) {
+            return Optional.of(selectedDirectory);
+        }
         return Optional.empty();
     }
 

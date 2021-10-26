@@ -13,15 +13,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 
 /**
  * FXML Controller class
@@ -30,9 +24,6 @@ import javafx.stage.FileChooser;
  */
 public class MainMenuController implements Initializable {
 
-    /**
-     * Initializes the controller class.
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
@@ -56,15 +47,14 @@ public class MainMenuController implements Initializable {
     private void openSelectDirectory() throws IOException {
         System.out.println("openSelectDirectory @ " + getClass().toString());
 
-        final DirectoryChooser directoryChooser
-                = new DirectoryChooser();
-        final File selectedDirectory
-                = directoryChooser.showDialog(OpenCVCats.getMainStage());
-        if (selectedDirectory != null) {
-            selectedDirectory.getAbsolutePath();
+        Optional<File> uploadDirectory = FileUtils.uploadDirectory(OpenCVCats.getMainStage(), null);
 
-            ViewUtils.loadView(getClass().getResource("views/BulkImageView.fxml"));
+        if (uploadDirectory.isPresent()) {
+            OpenCVCats.getMainStage().setUserData(uploadDirectory.get());
+        } else {
+            return;
         }
+        ViewUtils.loadView(getClass().getResource("views/BulkImageView.fxml"));
     }
 
     @FXML
