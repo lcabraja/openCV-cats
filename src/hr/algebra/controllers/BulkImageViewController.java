@@ -6,8 +6,12 @@
 package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
+import hr.algebra.utils.FileUtils;
+import hr.algebra.utils.ViewUtils;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,12 +34,26 @@ public class BulkImageViewController implements Initializable {
         // TODO
     }
 
-    
+    @FXML
+    private void goToDetailsPage() throws IOException {
+        System.out.println("goToDetailsPage @ " + getClass().toString());
+        Optional<File> uploadFile = getSelectedFile();
+        if (uploadFile.isPresent()) {
+            OpenCVCats.getMainStage().setUserData(uploadFile.get());
+        } else {
+            return;
+        }
+        final String view = "views/DetailedImageView.fxml";
+        ViewUtils.loadView(getClass().getResource("views/DetailedImageView.fxml"));
+    }
+
     @FXML
     private void goBack() throws IOException {
         System.out.println("openUseCamera");
-        Parent root = FXMLLoader.load(getClass().getResource("views/MainMenu.fxml"));
-        Scene scene = new Scene(root);
-        OpenCVCats.getMainStage().setScene(scene);
+        ViewUtils.loadView(getClass().getResource("views/MainMenu.fxml"));
+    }
+
+    private Optional<File> getSelectedFile() {
+        return Optional.empty();
     }
 }

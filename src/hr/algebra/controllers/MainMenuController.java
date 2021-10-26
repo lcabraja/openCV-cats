@@ -7,6 +7,7 @@ package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
 import hr.algebra.utils.FileUtils;
+import hr.algebra.utils.ViewUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -48,9 +49,7 @@ public class MainMenuController implements Initializable {
         } else {
             return;
         }
-        Parent root = FXMLLoader.load(getClass().getResource("views/DetailedImageView.fxml"));
-        Scene scene = new Scene(root);
-        OpenCVCats.getMainStage().setScene(scene);
+        ViewUtils.loadView(getClass().getResource("views/DetailedImageView.fxml"));
     }
 
     @FXML
@@ -64,17 +63,13 @@ public class MainMenuController implements Initializable {
         if (selectedDirectory != null) {
             selectedDirectory.getAbsolutePath();
 
-            Parent root = FXMLLoader.load(getClass().getResource("views/BulkImageView.fxml"));
-            Scene scene = new Scene(root);
-            OpenCVCats.getMainStage().setScene(scene);
+            ViewUtils.loadView(getClass().getResource("views/BulkImageView.fxml"));
         }
     }
 
     @FXML
     private void openUseCamera() throws IOException {
         System.out.println("openUseCamera @ " + getClass().toString());
-        Parent root = FXMLLoader.load(getClass().getResource("views/CameraImageView.fxml"));
-        Scene scene = new Scene(root);
-        OpenCVCats.getMainStage().setScene(scene);
+        ViewUtils.loadView(getClass().getResource("views/CameraImageView.fxml"));
     }
 }

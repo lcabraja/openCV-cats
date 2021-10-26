@@ -22,6 +22,9 @@ import org.opencv.core.CvType;
  */
 public final class ImageUtils {
 
+    private ImageUtils() {
+    }
+
     /**
      *
      * @param in buffered image
@@ -62,7 +65,6 @@ public final class ImageUtils {
      * @param frame the {@link Mat} representing the current frame
      * @return the {@link Image} to show
      */
-
     public static Image mat2Image(Mat frame) {
         try {
             return SwingFXUtils.toFXImage(matToBufferedImage(frame), null);

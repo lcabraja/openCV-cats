@@ -7,6 +7,7 @@ package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
 import hr.algebra.utils.ImageUtils;
+import hr.algebra.utils.ViewUtils;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,7 +24,6 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -115,7 +115,7 @@ public class DetailedImageViewController implements Initializable {
     }
 
     private void initImageAnalysis() throws FileNotFoundException {
-        radioSelection("resources/haarcascades/haarcascade_frontalface_alt.xml");
+        radioSelection("resources/haarcascades/haarcascade_frontalcatface.xml");
         Image image = initImage();
         bufferedImage = SwingFXUtils.fromFXImage(image, null);
         Runnable imageUpdater = setupRunnable();
@@ -158,9 +158,7 @@ public class DetailedImageViewController implements Initializable {
     private void goBack() throws IOException {
         System.out.println("goBack @ " + getClass().toString());
         stopAcquisition();
-        Parent root = FXMLLoader.load(getClass().getResource("views/MainMenu.fxml"));
-        Scene scene = new Scene(root);
-        OpenCVCats.getMainStage().setScene(scene);
+        ViewUtils.loadView(getClass().getResource("views/MainMenu.fxml"));
     }
 
     @FXML
@@ -169,7 +167,7 @@ public class DetailedImageViewController implements Initializable {
         if (rbLbp.isSelected()) {
             rbLbp.setSelected(false);
         }
-        radioSelection("resources/haarcascades/haarcascade_frontalface_alt.xml");
+        radioSelection("resources/haarcascades/haarcascade_frontalcatface.xml");
     }
 
     @FXML
@@ -178,7 +176,7 @@ public class DetailedImageViewController implements Initializable {
         if (rbHaar.isSelected()) {
             rbHaar.setSelected(false);
         }
-        radioSelection("resources/lbpcascades/lbpcascade_frontalface.xml");
+        radioSelection("resources/lbpcascades/lbpcascade_frontalcatface.xml");
     }
 
     private void radioSelection(String classifierPath) {

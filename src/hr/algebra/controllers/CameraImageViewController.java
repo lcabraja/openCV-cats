@@ -6,6 +6,7 @@
 package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
+import hr.algebra.utils.ViewUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -28,14 +29,12 @@ public class CameraImageViewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-    }    
-    
-     @FXML
+    }
+
+    @FXML
     private void goBack() throws IOException {
         System.out.println("goBack @ " + getClass().toString());
-        Parent root = FXMLLoader.load(getClass().getResource("views/MainMenu.fxml"));
-        Scene scene = new Scene(root);
-        OpenCVCats.getMainStage().setScene(scene);
+        ViewUtils.loadView(getClass().getResource("views/MainMenu.fxml"));
     }
-    
+
 }
