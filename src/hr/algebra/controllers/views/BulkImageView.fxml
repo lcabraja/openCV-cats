@@ -17,7 +17,7 @@
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <ListView fx:id="lvItems" onMouseClicked="#vwItemsClicked" prefHeight="200.0" prefWidth="200.0" />
+      <ListView fx:id="lvItems" onKeyPressed="#vwItemsPressed" onMouseClicked="#vwItemsClicked" prefHeight="200.0" prefWidth="200.0" />
       <GridPane GridPane.columnIndex="1">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -48,7 +48,7 @@
                   </Button>
                </children>
             </GridPane>
-            <ImageView fitHeight="328.0" fitWidth="301.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="ivPreview" fitHeight="328.0" fitWidth="301.0" pickOnBounds="true" preserveRatio="true" />
          </children>
       </GridPane>
    </children>

@@ -7,6 +7,7 @@ package hr.algebra.utils;
 
 import hr.algebra.OpenCVCats;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javafx.stage.DirectoryChooser;
@@ -71,11 +72,52 @@ public final class FileUtils {
         return Optional.empty();
     }
 
+    public static boolean extensionOf(File file, Extensions... extension) {
+        String[] paths = file.getAbsolutePath().trim().toLowerCase().split("\\.");
+        String ext = paths[paths.length - 1];
+        for (Extensions e : extension) {
+            switch (e) {
+                case ALLIMAGES:
+                    if ("png".equals(ext) || "jpg".equals(ext) || "jpeg".equals(ext) || "bmp".equals(ext) || "gif".equals(ext)) {
+
+                        return true;
+                    }
+                    break;
+                case PNG:
+                    if ("png".equals(ext)) {
+                        return true;
+                    }
+                    break;
+                case JPG:
+                    if ("jpg".equals(ext) || "jpeg".equals(ext)) {
+                        return true;
+                    }
+                    break;
+                case BMP:
+                    if ("bmp".equals(ext)) {
+                        return true;
+                    }
+                    break;
+                case GIF:
+                    if ("gif".equals(ext)) {
+                        System.out.println(file.getAbsolutePath() + " = true");
+                        return true;
+                    }
+                    break;
+                default:
+                    throw new AssertionError(e.name());
+
+            }
+        }
+        return false;
+    }
+
     public enum Extensions {
         ALLIMAGES("All Images", "*.png;*.jpg;*.jpeg;*.bmp"),
         PNG("PNG Files", "*.png"),
         JPG("JPG & JPEG Files", "*.jpg;*.jpeg"),
-        BMP("BMP Files", "*.bmp");
+        BMP("BMP Files", "*.bmp"),
+        GIF("GIF Files", "*.gif");
 
         private final String title;
         private final String extension;
