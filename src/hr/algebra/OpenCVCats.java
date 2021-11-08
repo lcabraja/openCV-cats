@@ -5,14 +5,10 @@
  */
 package hr.algebra;
 
-import hr.algebra.controllers.MainMenuController;
 import java.io.IOException;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import org.opencv.core.Core;
@@ -24,6 +20,8 @@ import org.opencv.core.Core;
 public class OpenCVCats extends Application {
 
     private static Stage mainStage;
+
+
 
     public static Stage getMainStage() {
         return mainStage;

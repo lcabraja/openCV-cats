@@ -6,6 +6,8 @@
 package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
+import hr.algebra.model.BulkImageViewHolder;
+import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.ViewUtils;
 import java.io.File;
@@ -44,27 +46,29 @@ public class BulkImageViewController implements Initializable {
     @FXML
     private ImageView ivPreview;
 
-    private File selectedDirectory;
+    private BulkImageViewHolder holder;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
         try {
-            selectedDirectory = ((File) OpenCVCats.getMainStage().getUserData());
+            holder = ((BulkImageViewHolder) OpenCVCats.getMainStage().getUserData());
             FileFilter fileFilter
                     = (File dir) -> dir.isFile() && FileUtils.extensionOf(dir, FileUtils.Extensions.ALLIMAGES);
-            File[] list = selectedDirectory.listFiles(fileFilter);
+            File[] list = holder.getSelectedDirectory().listFiles(fileFilter);
             ObservableList<String> oblist = FXCollections.observableArrayList();
             Stream.of(list).forEach((item) -> {
                 String[] path = item.toString().split("\\\\");
-                System.out.println(path[0]);
                 String fileName = path[path.length - 1];
                 oblist.add(fileName.trim());
             });
             lvItems.setItems(oblist);
+            if (holder.getSelectedIndex().isPresent()) {
+                lvItems.getSelectionModel().select((int) holder.getSelectedIndex().get());
+                updateImage();
+            }
         } catch (Exception e) {
-            System.out.println(e);
-            System.out.println("initialize.catch @ " + getClass().toString());
+            System.out.println("initialize.catch @ " + getClass().toString() + "\n" + e.toString());
         }
     }
 
@@ -87,7 +91,7 @@ public class BulkImageViewController implements Initializable {
 
     private File getSelectedImageFile() {
         String fileName = (String) lvItems.getSelectionModel().getSelectedItem();
-        File file = new File(selectedDirectory + File.separator + fileName);
+        File file = new File(holder.getSelectedDirectory() + File.separator + fileName);
         return file;
     }
 
@@ -96,7 +100,14 @@ public class BulkImageViewController implements Initializable {
         System.out.println("goToDetailsPage @ " + getClass().toString());
         Optional<File> uploadFile = getSelectedFile();
         if (uploadFile.isPresent()) {
-            OpenCVCats.getMainStage().setUserData(uploadFile.get());
+            OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
+                    getClass().getResource("views/BulkImageView.fxml"),
+                    uploadFile.get(),
+                    new BulkImageViewHolder(
+                            holder.getSelectedDirectory(),
+                            lvItems.getSelectionModel().getSelectedIndex()
+                    )
+            ));
         } else {
             return;
         }

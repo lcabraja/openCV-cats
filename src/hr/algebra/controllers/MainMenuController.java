@@ -6,6 +6,8 @@
 package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
+import hr.algebra.model.BulkImageViewHolder;
+import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.ViewUtils;
 import java.io.File;
@@ -36,7 +38,10 @@ public class MainMenuController implements Initializable {
         Optional<File> uploadFile = FileUtils.uploadFile(OpenCVCats.getMainStage(), null, FileUtils.Extensions.JPG);
 
         if (uploadFile.isPresent()) {
-            OpenCVCats.getMainStage().setUserData(uploadFile.get());
+            OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
+                    getClass().getResource("controllers/views/MainMenu.fxml"),
+                    uploadFile.get()
+            ));
         } else {
             return;
         }
@@ -50,7 +55,9 @@ public class MainMenuController implements Initializable {
         Optional<File> uploadDirectory = FileUtils.uploadDirectory(OpenCVCats.getMainStage(), null);
 
         if (uploadDirectory.isPresent()) {
-            OpenCVCats.getMainStage().setUserData(uploadDirectory.get());
+            OpenCVCats.getMainStage().setUserData(new BulkImageViewHolder(
+                    uploadDirectory.get()
+            ));
         } else {
             return;
         }

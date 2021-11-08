@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.controllers.CameraImageViewController">
-    
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="388.0" prefWidth="748.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.controllers.CameraImageViewController">
+   <children>
+      <ImageView fx:id="originalFrame" fitHeight="360.0" fitWidth="480.0" layoutX="14.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="modifiedFrameBottom" fitHeight="180.0" fitWidth="240.0" layoutX="494.0" layoutY="194.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="modifiedFrameTop" fitHeight="180.0" fitWidth="240.0" layoutX="494.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+         <viewport>
+            <Rectangle2D />
+         </viewport>
+      </ImageView>
+   </children>
 </AnchorPane>

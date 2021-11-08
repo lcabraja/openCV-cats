@@ -6,6 +6,8 @@
 package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
+import hr.algebra.model.BulkImageViewHolder;
+import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
 import java.awt.image.BufferedImage;
@@ -13,15 +15,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -30,7 +27,6 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.WindowEvent;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
@@ -47,8 +43,9 @@ import org.opencv.core.Size;
  */
 public class DetailedImageViewController implements Initializable {
 
-    private File setImage;
-
+    // -------------------------------------------------------------------------
+    // ----------------------------------                                 fields
+    // -------------------------------------------------------------------------
     @FXML
     private ImageView originalFrame;
     @FXML
@@ -59,77 +56,53 @@ public class DetailedImageViewController implements Initializable {
     private RadioButton rbHaar;
     @FXML
     private RadioButton rbLbp;
-
     final ToggleGroup group = new ToggleGroup();
 
+    private int absoluteFaceSize = 0;
+    private DetailedImageViewHolder holder;
     private CascadeClassifier faceCascade;
-    private int absoluteFaceSize;
     private BufferedImage bufferedImage;
-    private ScheduledExecutorService timer;
+    private File setImage;
 
+    // -------------------------------------------------------------------------
+    // ----------------------------------                                  inits
+    // -------------------------------------------------------------------------
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
         initFields();
+        analyzeImage();
+    }
+
+    private void initFields() {
+        holder = ((DetailedImageViewHolder) OpenCVCats.getMainStage().getUserData());
+        rbHaar.setToggleGroup(group);
+        rbLbp.setToggleGroup(group);
+        rbHaar.setSelected(true);
+        faceCascade = new CascadeClassifier();
+        radioSelection("resources/haarcascades/haarcascade_frontalcatface.xml"); // selects the haar cascade as the default cascade
+    }
+
+    // -------------------------------------------------------------------------
+    // ----------------------------------                              rendering
+    // -------------------------------------------------------------------------
+    private void analyzeImage() {
         try {
-            initImageAnalysis();
+            setImage = holder.getImageFile();
+            bufferedImage = SwingFXUtils.fromFXImage(new Image(new FileInputStream(setImage)), null);
+            if (bufferedImage != null) {
+                Mat frame = ImageUtils.bufferedImageToMat(bufferedImage);
+                detectAndDrawRects(frame);
+                Image imageToShow = ImageUtils.mat2Image(frame);
+                updateImageView(imageToShow);
+            }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private Runnable setupRunnable() {
-        System.out.println("setupRunnable @ " + getClass().toString());
-        OpenCVCats.getMainStage()
-                .setOnCloseRequest((WindowEvent t) -> {
-                    Platform.exit();
-                    System.exit(0);
-                });
-        return () -> {
-            try {
-                System.out.println("runnable @ " + getClass().toString());
-                if (bufferedImage != null) {
-                    Mat frame = grabFrame();
-                    Image imageToShow = ImageUtils.mat2Image(frame);
-                    updateImageView(imageToShow);
-                }
-            } catch (Exception e) {
-                System.out.println("setupRunnable.catch @ " + getClass().toString());
-            }
-        };
-    }
-
-    private void updateImageView(Image imageToShow) {
-        System.out.println("updateImageView @ " + getClass().toString());
-        ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
-    }
-
-    private Image initImage() throws FileNotFoundException {
-        //return new Image("https://i.imgur.com/QUxuGcL.jpeg");
-        setImage = ((File) OpenCVCats.getMainStage().getUserData());
-        InputStream is = new FileInputStream(setImage);
-        return new Image(is);
-    }
-
-    private void initImageAnalysis() throws FileNotFoundException {
-        radioSelection("resources/haarcascades/haarcascade_frontalcatface.xml");
-        Image image = initImage();
-        bufferedImage = SwingFXUtils.fromFXImage(image, null);
-        Runnable imageUpdater = setupRunnable();
-        timer = Executors.newSingleThreadScheduledExecutor();
-        timer.scheduleAtFixedRate(imageUpdater, 0, 500, TimeUnit.MILLISECONDS);
-    }
-
-    private void initFields() {
-        rbHaar.setToggleGroup(group);
-        rbLbp.setToggleGroup(group);
-        rbHaar.setSelected(true);
-        faceCascade = new CascadeClassifier();
-        absoluteFaceSize = 0;
-    }
-
-    private void detectAndDisplay(Mat frame) {
-        System.out.println("detectAndDisplay @ " + getClass().toString());
+    private void detectAndDrawRects(Mat frame) {
+        System.out.println("detectAndDrawRects @ " + getClass().toString());
         MatOfRect faces = new MatOfRect();
         Mat grayFrame = new Mat();
         // convert the frame in gray scale
@@ -143,19 +116,32 @@ public class DetailedImageViewController implements Initializable {
                 absoluteFaceSize = Math.round(height * 0.2f);
             }
         }
+        // scan for faces 
         faceCascade.detectMultiScale(grayFrame, faces, 1.1, 2, Objdetect.CASCADE_SCALE_IMAGE,
                 new Size(absoluteFaceSize, absoluteFaceSize), new Size());
+        // extract face rectangles
         Rect[] facesArray = faces.toArray();
+        // draw rectangles
         for (Rect facesArray1 : facesArray) {
             Imgproc.rectangle(frame, facesArray1.tl(), facesArray1.br(), new Scalar(0, 255, 0), 3);
         }
     }
 
+    private void updateImageView(Image imageToShow) {
+        System.out.println("updateImageView @ " + getClass().toString());
+        ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
+    }
+
+    // -------------------------------------------------------------------------
+    // ----------------------------------                                UI code
+    // -------------------------------------------------------------------------
     @FXML
     private void goBack() throws IOException {
         System.out.println("goBack @ " + getClass().toString());
-        stopAcquisition();
-        ViewUtils.loadView(getClass().getResource("views/MainMenu.fxml"));
+        if (holder.getReturnHolder().isPresent()) {
+            OpenCVCats.getMainStage().setUserData(holder.getReturnHolder().get());
+        }
+        ViewUtils.loadView(holder.getReturnResource());
     }
 
     @FXML
@@ -180,28 +166,4 @@ public class DetailedImageViewController implements Initializable {
         System.out.println("checkboxSelection @ " + getClass().toString());
         faceCascade.load(classifierPath);
     }
-
-    private Mat grabFrame() {
-        System.out.println("grabFrame @ " + getClass().toString());
-        Mat frame;
-        frame = ImageUtils.bufferedImageToMat(bufferedImage);
-        if (!frame.empty()) {
-            detectAndDisplay(frame);
-        }
-        return frame;
-    }
-
-    private void stopAcquisition() {
-        if (timer != null && !timer.isShutdown()) {
-            try {
-                timer.shutdown();
-                timer.awaitTermination(33, TimeUnit.MILLISECONDS);
-
-            } catch (InterruptedException ex) {
-                Logger.getLogger(DetailedImageViewController.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
 }
