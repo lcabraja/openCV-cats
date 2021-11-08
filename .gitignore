@@ -1,2 +1,4 @@
-/build/
-/dist/
+/build
+/dist
+/out
+openCV-cats.iml
