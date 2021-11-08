@@ -39,7 +39,7 @@ public class MainMenuController implements Initializable {
 
         if (uploadFile.isPresent()) {
             OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
-                    getClass().getResource("controllers/views/MainMenu.fxml"),
+                    getClass().getResource("views/MainMenu.fxml"),
                     uploadFile.get()
             ));
         } else {

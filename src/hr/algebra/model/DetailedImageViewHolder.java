@@ -22,6 +22,7 @@ public class DetailedImageViewHolder {
     public DetailedImageViewHolder(URL returnResource, File imageFile) {
         this.returnResource = returnResource;
         this.imageFile = imageFile;
+        this.returnHolder = Optional.empty();
     }
 
     public DetailedImageViewHolder(URL returnResource, File imageFile, Object returnHolder) {
@@ -45,6 +46,4 @@ public class DetailedImageViewHolder {
     public Optional<Object> getReturnHolder() {
         return returnHolder;
     }
-
-  
 }
