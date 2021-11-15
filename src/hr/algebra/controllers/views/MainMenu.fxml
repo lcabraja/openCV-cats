@@ -30,5 +30,6 @@
       <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#openSelectDirectory" text="Select directory" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="6" />
       <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#openSelectFile" text="Select file" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="5" />
       <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#openUseCamera" text="Use Camera" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+      <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#openDocumentation" text="View Documentation" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="8" />
    </children>
 </GridPane>

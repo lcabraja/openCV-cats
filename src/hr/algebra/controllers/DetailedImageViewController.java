@@ -6,8 +6,8 @@
 package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
-import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
+import hr.algebra.utils.ColorUtils;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
 import java.awt.image.BufferedImage;
@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +24,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
@@ -53,6 +55,8 @@ public class DetailedImageViewController implements Initializable {
     @FXML
     private ImageView modifiedFrameBottom;
     @FXML
+    private Label lbRectangles;
+    @FXML
     private RadioButton rbHaar;
     @FXML
     private RadioButton rbLbp;
@@ -63,6 +67,10 @@ public class DetailedImageViewController implements Initializable {
     private CascadeClassifier faceCascade;
     private BufferedImage bufferedImage;
     private File setImage;
+
+    private Map<String, Rect> faceRectangles;
+    Rect[] facesArray;
+    private String lastRectColor = null;
 
     // -------------------------------------------------------------------------
     // ----------------------------------                                  inits
@@ -95,6 +103,7 @@ public class DetailedImageViewController implements Initializable {
                 detectAndDrawRects(frame);
                 Image imageToShow = ImageUtils.mat2Image(frame);
                 updateImageView(imageToShow);
+                displayStatistics();
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
@@ -120,10 +129,28 @@ public class DetailedImageViewController implements Initializable {
         faceCascade.detectMultiScale(grayFrame, faces, 1.1, 2, Objdetect.CASCADE_SCALE_IMAGE,
                 new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         // extract face rectangles
-        Rect[] facesArray = faces.toArray();
+        facesArray = faces.toArray();
         // draw rectangles
+        Scalar color;
+        lastRectColor = ColorUtils.getDeterministicColorHex();
         for (Rect facesArray1 : facesArray) {
-            Imgproc.rectangle(frame, facesArray1.tl(), facesArray1.br(), new Scalar(0, 255, 0), 3);
+            color = ColorUtils.hexToScalar(lastRectColor);
+            lastRectColor = ColorUtils.getDeterministicColorHex(lastRectColor);
+            Imgproc.rectangle(frame, facesArray1.tl(), facesArray1.br(), color, 3);
+        }
+    }
+
+    private void displayStatistics() {
+        switch (facesArray.length) {
+            case 0:
+                lbRectangles.setText("Detected no cats");
+                break;
+            case 1:
+                lbRectangles.setText("Detected 1 cat");
+                break;
+            default:
+                lbRectangles.setText(String.format("Detected %d cats", facesArray.length));
+                break;
         }
     }
 
@@ -165,5 +192,7 @@ public class DetailedImageViewController implements Initializable {
     private void radioSelection(String classifierPath) {
         System.out.println("checkboxSelection @ " + getClass().toString());
         faceCascade.load(classifierPath);
+        analyzeImage();
     }
+
 }

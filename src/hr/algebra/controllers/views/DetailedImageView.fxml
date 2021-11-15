@@ -40,7 +40,7 @@
                </GridPane.margin></Button>
             <Label text="Label" GridPane.rowIndex="1" />
             <Label text="Label" GridPane.rowIndex="2" />
-            <Label text="Label" />
+            <Label fx:id="lbRectangles" text="Label" />
             <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

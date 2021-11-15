@@ -5,6 +5,7 @@
  */
 package hr.algebra;
 
+import hr.algebra.model.Descriptor;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -20,8 +21,6 @@ import org.opencv.core.Core;
 public class OpenCVCats extends Application {
 
     private static Stage mainStage;
-
-
 
     public static Stage getMainStage() {
         return mainStage;
@@ -41,6 +40,7 @@ public class OpenCVCats extends Application {
         launch(args);
     }
 
+    @Descriptor("Test")
     private void showMainMenu() throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("controllers/views/MainMenu.fxml"));
         Scene scene = new Scene(root);
