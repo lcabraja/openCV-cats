@@ -8,18 +8,16 @@ package hr.algebra.controllers;
 import hr.algebra.OpenCVCats;
 import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
+import hr.algebra.model.UIStateHolder;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.ReflectionUtils;
+import hr.algebra.utils.SerializationUtils;
 import hr.algebra.utils.ViewUtils;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
@@ -27,9 +25,11 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 
 /**
@@ -39,9 +39,18 @@ import javafx.scene.control.ButtonType;
  */
 public class MainMenuController implements Initializable {
 
+    @FXML
+    private Button btnLastFile;
+    @FXML
+    private Button btnLastFolder;
+
+    Optional<UIStateHolder> state;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        btnLastFile.setVisible(false);
+        btnLastFolder.setVisible(false);
+        loadLastValues();
     }
 
     @FXML
@@ -55,6 +64,7 @@ public class MainMenuController implements Initializable {
                     getClass().getResource("views/MainMenu.fxml"),
                     uploadFile.get()
             ));
+            saveLastFile(uploadFile.get().getAbsolutePath());
         } else {
             return;
         }
@@ -71,6 +81,7 @@ public class MainMenuController implements Initializable {
             OpenCVCats.getMainStage().setUserData(new BulkImageViewHolder(
                     uploadDirectory.get()
             ));
+            saveLastDirectory(uploadDirectory.get().getAbsolutePath());
         } else {
             return;
         }
@@ -115,8 +126,8 @@ public class MainMenuController implements Initializable {
         builder.append("</body>\n");
         builder.append("</html>\n");
 
-        try (FileWriter zapisivac = new FileWriter("documentation.html")) {
-            zapisivac.write(builder.toString());
+        try (FileWriter fw = new FileWriter("documentation.html")) {
+            fw.write(builder.toString());
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Documentation successfully generated");
@@ -126,7 +137,7 @@ public class MainMenuController implements Initializable {
                     "Press OK to view");
 
             Optional<ButtonType> result = alert.showAndWait();
-            if(result.isPresent() && result.get() == ButtonType.OK) {
+            if (result.isPresent() && result.get() == ButtonType.OK) {
                 File htmlFile = new File("documentation.html");
                 Desktop.getDesktop().browse(htmlFile.toURI());
             }
@@ -164,7 +175,7 @@ public class MainMenuController implements Initializable {
             String fullyQualifiedClassName = Arrays
                     .stream(split)
                     .collect(Collectors.joining("."));
-            System.out.println(fullyQualifiedClassName + " " + String.valueOf(header));
+            System.out.println(fullyQualifiedClassName + " H" + String.valueOf(header));
             appendHTMLforClass(builder, fullyQualifiedClassName, header);
         }
     }
@@ -204,5 +215,68 @@ public class MainMenuController implements Initializable {
         if (Modifier.isSynchronized(modifiers)) {
             builder.append("synchronized ");
         }
+    }
+
+    private void loadLastValues() {
+        Optional<UIStateHolder> serializedFile
+                = SerializationUtils.<UIStateHolder>fetchSerializaedItem(SerializationUtils.UI_SERIALIZATION);
+        if (serializedFile.isPresent()) {
+            state = serializedFile;
+            btnLastFile.setVisible(state.get().getLastFile().isPresent());
+            btnLastFolder.setVisible(state.get().getLastFolder().isPresent());
+
+        } else {
+            state = Optional.empty();
+            btnLastFile.setVisible(false);
+            btnLastFolder.setVisible(false);
+
+        }
+    }
+
+    private void saveLastDirectory(String folder) {
+        UIStateHolder newState;
+        if (state.isPresent()) {
+            newState = new UIStateHolder(state.get().getLastFile(), Optional.of(folder));
+        } else {
+            newState = new UIStateHolder(Optional.empty(), Optional.of(folder));
+        }
+        SerializationUtils.updateSerializedItem(newState, SerializationUtils.UI_SERIALIZATION);
+    }
+
+    private void saveLastFile(String file) {
+        UIStateHolder newState;
+        if (state.isPresent()) {
+            newState = new UIStateHolder(Optional.of(file), state.get().getLastFolder());
+        } else {
+            newState = new UIStateHolder(Optional.of(file), Optional.empty());
+        }
+        SerializationUtils.updateSerializedItem(newState, SerializationUtils.UI_SERIALIZATION);
+    }
+
+    @FXML
+    private void openLastFile(ActionEvent event) throws IOException {
+        if (state.isPresent() && state.get().getLastFile().isPresent()) {
+            OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
+                    getClass().getResource("views/MainMenu.fxml"),
+                    new File(state.get().getLastFile().get())
+            ));
+            ViewUtils.loadView(getClass().getResource("views/DetailedImageView.fxml"));
+        }
+    }
+
+    @FXML
+    private void openLastFolder(ActionEvent event) throws IOException {
+        if (state.isPresent() && state.get().getLastFolder().isPresent()) {
+            OpenCVCats.getMainStage().setUserData(
+                    new BulkImageViewHolder(
+                            new File(state.get().getLastFolder().get())));
+            ViewUtils.loadView(getClass().getResource("views/BulkImageView.fxml"));
+        }
+    }
+
+    @FXML
+    private void clearSerialization(ActionEvent event) {
+        new File(SerializationUtils.UI_SERIALIZATION).delete();
+        loadLastValues();
     }
 }
