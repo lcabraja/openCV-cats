@@ -101,7 +101,6 @@ public class MainMenuController implements Initializable {
             state = Optional.empty();
             btnLastFile.setVisible(false);
             btnLastFolder.setVisible(false);
-
         }
     }
 

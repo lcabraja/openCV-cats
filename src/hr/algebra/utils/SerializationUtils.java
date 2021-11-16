@@ -5,18 +5,13 @@
  */
 package hr.algebra.utils;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -25,6 +20,7 @@ import java.util.logging.Logger;
 public class SerializationUtils {
 
     public static final String UI_SERIALIZATION = "ui.ser";
+    public static final String RECT_SERIALIZATION = "rects.ser";
 
     public static <T> Optional<T> fetchSerializaedItem(String location) {
         try (ObjectInputStream ois
