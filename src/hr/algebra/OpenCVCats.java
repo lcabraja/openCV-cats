@@ -5,6 +5,8 @@
  */
 package hr.algebra;
 
+import hr.algebra.caching.Cache;
+import hr.algebra.caching.MemCache;
 import hr.algebra.model.Descriptor;
 import java.io.IOException;
 import javafx.application.Application;
@@ -20,6 +22,7 @@ import org.opencv.core.Core;
  */
 public class OpenCVCats extends Application {
 
+    public static Cache cache = new MemCache();
     private static Stage mainStage;
 
     public static Stage getMainStage() {

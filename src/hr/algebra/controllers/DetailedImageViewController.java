@@ -6,6 +6,7 @@
 package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
+import hr.algebra.caching.Cache;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.utils.ColorUtils;
 import hr.algebra.utils.ImageUtils;
@@ -16,7 +17,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Map;
+import java.nio.ByteBuffer;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,13 +64,15 @@ public class DetailedImageViewController implements Initializable {
     private RadioButton rbLbp;
     final ToggleGroup group = new ToggleGroup();
 
+    private Cache cache = OpenCVCats.cache;
+
     private int absoluteFaceSize = 0;
     private DetailedImageViewHolder holder;
     private CascadeClassifier faceCascade;
+    private String faceCascadePath;
     private BufferedImage bufferedImage;
     private File setImage;
 
-    private Map<String, Rect> faceRectangles;
     Rect[] facesArray;
     private String lastRectColor = null;
 
@@ -100,7 +104,16 @@ public class DetailedImageViewController implements Initializable {
             bufferedImage = SwingFXUtils.fromFXImage(new Image(new FileInputStream(setImage)), null);
             if (bufferedImage != null) {
                 Mat frame = ImageUtils.bufferedImageToMat(bufferedImage);
-                detectAndDrawRects(frame);
+                if (cache.contains(setImage, faceCascadePath)) {
+                    Optional<Rect[]> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
+                    if (potentialFaces.isPresent()) {
+                        facesArray = potentialFaces.get();
+                    }
+                } else {
+                    detectRects(frame);
+                    cache.setFaceRects(setImage, facesArray, faceCascadePath);
+                }
+                drawRectangles(frame);
                 Image imageToShow = ImageUtils.mat2Image(frame);
                 updateImageView(imageToShow);
                 displayStatistics();
@@ -110,7 +123,7 @@ public class DetailedImageViewController implements Initializable {
         }
     }
 
-    private void detectAndDrawRects(Mat frame) {
+    private void detectRects(Mat frame) {
         System.out.println("detectAndDrawRects @ " + getClass().toString());
         MatOfRect faces = new MatOfRect();
         Mat grayFrame = new Mat();
@@ -130,13 +143,16 @@ public class DetailedImageViewController implements Initializable {
                 new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         // extract face rectangles
         facesArray = faces.toArray();
+    }
+
+    private void drawRectangles(Mat frame) {
         // draw rectangles
         Scalar color;
         lastRectColor = ColorUtils.getDeterministicColorHex();
-        for (Rect facesArray1 : facesArray) {
+        for (Rect face : facesArray) {
             color = ColorUtils.hexToScalar(lastRectColor);
             lastRectColor = ColorUtils.getDeterministicColorHex(lastRectColor);
-            Imgproc.rectangle(frame, facesArray1.tl(), facesArray1.br(), color, 3);
+            Imgproc.rectangle(frame, face.tl(), face.br(), color, 3);
         }
     }
 
@@ -191,6 +207,7 @@ public class DetailedImageViewController implements Initializable {
 
     private void radioSelection(String classifierPath) {
         System.out.println("checkboxSelection @ " + getClass().toString());
+        faceCascadePath = classifierPath;
         faceCascade.load(classifierPath);
         analyzeImage();
     }

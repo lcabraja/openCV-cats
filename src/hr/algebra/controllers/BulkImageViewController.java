@@ -52,7 +52,7 @@ public class BulkImageViewController implements Initializable {
         try {
             holder = ((BulkImageViewHolder) OpenCVCats.getMainStage().getUserData());
             FileFilter fileFilter
-                    = (File dir) -> dir.isFile() && FileUtils.extensionOf(dir, FileUtils.Extensions.ALLIMAGES);
+                    = (File dir) -> dir.isFile() && FileUtils.extensionOf(dir, FileUtils.Extensions.JPG);
             File[] list = holder.getSelectedDirectory().listFiles(fileFilter);
             ObservableList<String> oblist = FXCollections.observableArrayList();
             Stream.of(list).forEach((item) -> {
@@ -62,7 +62,9 @@ public class BulkImageViewController implements Initializable {
             });
             lvItems.setItems(oblist);
             if (holder.getSelectedIndex().isPresent()) {
-                lvItems.getSelectionModel().select((int) holder.getSelectedIndex().get());
+                int index = (int) holder.getSelectedIndex().get();
+                lvItems.getSelectionModel().select(index);
+                lvItems.scrollTo(index);
                 updateImage();
             }
         } catch (Exception e) {
