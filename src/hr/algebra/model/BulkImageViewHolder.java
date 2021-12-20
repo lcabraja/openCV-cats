@@ -19,6 +19,7 @@ public class BulkImageViewHolder {
 
     public BulkImageViewHolder(File selectedDirectory) {
         this.selectedDirectory = selectedDirectory;
+        this.selectedIndex = Optional.empty();
     }
 
     public BulkImageViewHolder(File selectedDirectory, Optional<Integer> selectedIndex) {
@@ -39,4 +40,8 @@ public class BulkImageViewHolder {
         return selectedIndex;
     }
 
+    @Override
+    public String toString() {
+        return "BulkImageViewHolder{" + "selectedDirectory=" + selectedDirectory + ", selectedIndex=" + selectedIndex + '}';
+    }
 }

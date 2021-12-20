@@ -5,8 +5,11 @@
  */
 package hr.algebra.caching;
 
+import hr.algebra.model.CachedFile;
 import hr.algebra.utils.SerializationUtils;
 import java.io.File;
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.opencv.core.Rect;
@@ -27,25 +30,60 @@ public class FileCache implements Cache {
     }
 
     @Override
-    public boolean contains(File imageFile) {
-        Optional<Map<String, Rect[]>> serializedFile
-                = SerializationUtils.<Map<String, Rect[]>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
+    public boolean contains(File imageFile, String classifierPath) {
+        System.out.println("contains @ " + getClass().toString());
+        CachedFile cf = new CachedFile() {
+            {
+                setFilePath(imageFile.getAbsolutePath());
+                setClassifierPath(classifierPath);
+            }
+        };
+        Optional<Map<CachedFile, Rect[]>> serializedFile
+                = getSerializedFile();
         return serializedFile.isPresent();
     }
 
     @Override
-    public Optional<Rect[]> getFaceRects(File imageFile) {
-        Optional<Map<String, Rect[]>> serializedFile
-                = SerializationUtils.<Map<String, Rect[]>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
-        if (serializedFile.isPresent() && serializedFile.get().containsKey(imageFile.getAbsoluteFile())) {
-            return Optional.of(serializedFile.get().get(imageFile.getAbsoluteFile()));
+    public Optional<Rect[]> getFaceRects(File imageFile, String classifierPath) {
+        System.out.println("getFaceRects @ " + getClass().toString());
+        CachedFile cf = new CachedFile() {
+            {
+                setFilePath(imageFile.getAbsolutePath());
+                setClassifierPath(classifierPath);
+            }
+        };
+        Optional<Map<CachedFile, Rect[]>> serializedFile
+                = getSerializedFile();
+        if (serializedFile.isPresent()
+                && serializedFile.get().containsKey(cf)) {
+            return Optional.of(serializedFile.get().get(cf));
         }
         return Optional.empty();
     }
 
+    private Optional<Map<CachedFile, Rect[]>> getSerializedFile() {
+        System.out.println("getSerializedFile @ " + getClass().toString());
+        Optional<Map<CachedFile, Rect[]>> serializedFile
+                = SerializationUtils.<Map<CachedFile, Rect[]>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
+        return serializedFile;
+    }
+
     @Override
-    public void setFaceRects(File imageFile, Rect[] facesArray) {
-        SerializationUtils.updateSerializedItem(imageFile.getAbsoluteFile(), SerializationUtils.RECT_SERIALIZATION);
+    public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
+        System.out.println("setFaceRects @ " + getClass().toString());
+        CachedFile cf = new CachedFile() {
+            {
+                setFilePath(imageFile.getAbsolutePath());
+                setClassifierPath(classifierPath);
+            }
+        };
+
+        if (contains(imageFile, classifierPath)) {
+            Map<String, String> previousSerialization = new HashMap<>();
+//            Map<CachedFile, Rect[]> previousSerialization = getSerializedFile().get();
+//            previousSerialization.put(cf, facesArray);
+            SerializationUtils.updateSerializedItem((Serializable) previousSerialization, SerializationUtils.RECT_SERIALIZATION);
+        }
     }
 
 }

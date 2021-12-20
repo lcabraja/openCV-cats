@@ -5,10 +5,9 @@
  */
 package hr.algebra.caching;
 
+import hr.algebra.model.CachedFile;
 import java.io.File;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.opencv.core.Rect;
@@ -19,13 +18,20 @@ import org.opencv.core.Rect;
  */
 public class MemCache implements Cache {
 
-    private Map<File, Map<String, Rect[]>> faces = new HashMap<>();
+//    private Map<CachedFile, Rect[]>> 
+    private final Map<CachedFile, Rect[]> faces = new HashMap<>();
 
     @Override
     public boolean contains(File imageFile, String classifierPath) {
         System.out.println("contains @ " + getClass().toString());
-        if (faces.containsKey(imageFile)) {
-            return faces.get(imageFile).containsKey(classifierPath);
+        CachedFile cf = new CachedFile() {
+            {
+                setFilePath(imageFile.getAbsolutePath());
+                setClassifierPath(classifierPath);
+            }
+        };
+        if (faces.containsKey(cf)) {
+            return faces.containsKey(cf);
         }
         return false;
     }
@@ -33,10 +39,14 @@ public class MemCache implements Cache {
     @Override
     public Optional<Rect[]> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
-        if (faces.containsKey(imageFile)) {
-            if (faces.get(imageFile).containsKey(classifierPath)) {
-                return Optional.of(faces.get(imageFile).get(classifierPath));
+        CachedFile cf = new CachedFile() {
+            {
+                setFilePath(imageFile.getAbsolutePath());
+                setClassifierPath(classifierPath);
             }
+        };
+        if (faces.containsKey(cf)) {
+            return Optional.of(faces.get(cf));
         }
         return Optional.empty();
     }
@@ -44,13 +54,13 @@ public class MemCache implements Cache {
     @Override
     public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
         System.out.println("setFaceRects @ " + getClass().toString());
-        if (faces.containsKey(imageFile)) {
-            faces.get(imageFile).put(classifierPath, facesArray);
-        } else {
-            Map<String, Rect[]> newFace = new HashMap<>();
-            newFace.put(classifierPath, facesArray);
-            faces.put(imageFile, newFace);
-        }
+        CachedFile cf = new CachedFile() {
+            {
+                setFilePath(imageFile.getAbsolutePath());
+                setClassifierPath(classifierPath);
+            }
+        };
+        faces.put(cf, facesArray);
     }
 
 }

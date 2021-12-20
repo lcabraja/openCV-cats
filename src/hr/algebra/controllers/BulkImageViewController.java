@@ -67,8 +67,8 @@ public class BulkImageViewController implements Initializable {
                 lvItems.scrollTo(index);
                 updateImage();
             }
-        } catch (Exception e) {
-            System.out.println("initialize.catch @ " + getClass().toString() + "\n" + e.toString());
+        } catch (FileNotFoundException e) {
+            System.out.println("initialize.catch @ " + getClass().toString() + "\n\t" + e.toString());
         }
     }
 
