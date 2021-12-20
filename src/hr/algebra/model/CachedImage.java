@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.Optional;
 import org.opencv.core.Rect;
 
 /**
@@ -20,7 +21,7 @@ public class CachedImage implements Serializable {
 
     private File file;
     private Rect[] results;
-    private byte[] image;
+    private Optional<byte[]> image;
 
     private static final long serialVersionUID = 1L;
 
@@ -32,10 +33,10 @@ public class CachedImage implements Serializable {
         this.results = results;
     }
 
-    public CachedImage(File file, Rect[] results, byte[] Image) {
+    public CachedImage(File file, Rect[] results, byte[] image) {
         this.file = file;
         this.results = results;
-        this.image = Image;
+        this.image = Optional.of(image);
     }
 
     public File getFile() {
@@ -54,12 +55,12 @@ public class CachedImage implements Serializable {
         this.results = results;
     }
 
-    public byte[] getImage() {
+    public Optional<byte[]> getImage() {
         return image;
     }
 
     public void setImage(byte[] Image) {
-        this.image = Image;
+        this.image = Image.length == 0 ? Optional.empty() : Optional.of(Image);
     }
 
     private String rectsToStrings() {
