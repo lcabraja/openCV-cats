@@ -30,7 +30,7 @@ public class DocumentationUtils {
     private DocumentationUtils() {
     }
 
-    public static void generirajDokumentaciju() {
+    public static void generateDocumentation() {
         System.out.println("generirajDokumentaciju @ " + DocumentationUtils.class.toString());
         
         StringBuilder builder = new StringBuilder();

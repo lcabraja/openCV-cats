@@ -6,9 +6,9 @@
 package hr.algebra;
 
 import hr.algebra.caching.Cache;
-import hr.algebra.caching.FileCache;
 import hr.algebra.caching.MemCache;
 import hr.algebra.model.Descriptor;
+import hr.algebra.serving.Server;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -24,7 +24,7 @@ import org.opencv.core.Core;
 public class OpenCVCats extends Application {
 
 //    public static Cache cache = new MemCache();
-    public static Cache cache = new FileCache();
+    public static Cache cache = new MemCache();
     private static Stage mainStage;
 
     public static Stage getMainStage() {
@@ -32,8 +32,9 @@ public class OpenCVCats extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage) throws IOException, InterruptedException {
         mainStage = primaryStage;
+//        FXTesting.start(primaryStage); System.exit(0); if (true) return;
         showMainMenu();
     }
 

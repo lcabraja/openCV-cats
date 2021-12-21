@@ -9,6 +9,7 @@ import hr.algebra.OpenCVCats;
 import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.UIStateHolder;
+import hr.algebra.serving.Server;
 import hr.algebra.utils.DocumentationUtils;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.SerializationUtils;
@@ -87,8 +88,9 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void openDocumentation() {
-        DocumentationUtils.generirajDokumentaciju();
+        DocumentationUtils.generateDocumentation();
     }
+
     private void loadLastValues() {
         Optional<UIStateHolder> serializedFile
                 = SerializationUtils.<UIStateHolder>fetchSerializaedItem(SerializationUtils.UI_SERIALIZATION);
@@ -123,6 +125,18 @@ public class MainMenuController implements Initializable {
         }
         SerializationUtils.updateSerializedItem(newState, SerializationUtils.UI_SERIALIZATION);
     }
+
+    @FXML
+    public void btnServe() throws IOException {
+        Server.startServer();
+    }
+    
+    @FXML
+    public void btnListenToOtherPeopleWorking() throws IOException {
+        System.out.println("listenToOtherPeopleWorking @ " + getClass().toString());
+        ViewUtils.loadView(getClass().getResource("views/ListenerView.fxml"));
+    }
+
 
     @FXML
     private void openLastFile(ActionEvent event) throws IOException {

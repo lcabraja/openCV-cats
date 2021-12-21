@@ -20,15 +20,6 @@ import org.opencv.core.Rect;
  */
 public class FileCache implements Cache {
 
-    private static Cache singleton = null;
-
-    public static Cache getInstance() {
-        if (singleton == null) {
-            singleton = new FileCache();
-        }
-        return singleton;
-    }
-
     @Override
     public boolean contains(File imageFile, String classifierPath) {
         System.out.println("contains @ " + getClass().toString());
@@ -78,12 +69,14 @@ public class FileCache implements Cache {
             }
         };
 
+        Map<CachedFile, Rect[]> previousSerialization;
         if (contains(imageFile, classifierPath)) {
-            Map<String, String> previousSerialization = new HashMap<>();
-//            Map<CachedFile, Rect[]> previousSerialization = getSerializedFile().get();
-//            previousSerialization.put(cf, facesArray);
-            SerializationUtils.updateSerializedItem((Serializable) previousSerialization, SerializationUtils.RECT_SERIALIZATION);
+            previousSerialization = getSerializedFile().get();
+            previousSerialization.put(cf, facesArray);
+        } else {
+            previousSerialization = new HashMap<>();
         }
+        SerializationUtils.updateSerializedItem((Serializable) previousSerialization, SerializationUtils.RECT_SERIALIZATION);
     }
 
 }
