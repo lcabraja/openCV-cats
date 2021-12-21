@@ -97,14 +97,18 @@ public class CachedImage implements Serializable {
         oos.defaultWriteObject();
         oos.writeObject(getFile());
         oos.writeUTF(rectsToStrings());
-        oos.write(image);
+        oos.write(image.get().length);
+        oos.write(image.get());
     }
 
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
         setFile((File) ois.readObject());
         setResults(stringToRects(ois.readUTF()));
+        int arraySize = ois.readInt();
+        byte[] image = new byte[arraySize];
         ois.read(image);
+        setImage(image);
     }
 
 }
