@@ -13,5 +13,7 @@ import java.rmi.RemoteException;
  * @author lcabraja
  */
 public interface ToggleService extends Remote {
-    public void toggleCss()throws RemoteException;
+
+    String REMOTE_OBJECT_NAME = "hr.algebra.rmi.ToggleService";
+    public void toggleCss() throws RemoteException;
 }

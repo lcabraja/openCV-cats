@@ -9,6 +9,7 @@ import hr.algebra.OpenCVCats;
 import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.UIStateHolder;
+import hr.algebra.rmi.RMIServiceHost;
 import hr.algebra.rmi.ToggleService;
 import hr.algebra.serving.Client;
 import hr.algebra.serving.Server;
@@ -19,6 +20,7 @@ import hr.algebra.utils.ViewUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -171,20 +173,13 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void makeJndiHappen(ActionEvent event) {
-//        System.out.println("Client started!");
-//        
-//        Registry registry;
-//        try {
-//            registry = LocateRegistry.getRegistry();
-//            System.out.println("Registry retrieved!");
-//            ToggleService server = (ToggleService) registry
-//                .lookup("MessengerService");
-//            System.out.println("Service retrieved!");
-//            server.toggleCss();
-//        } catch (RemoteException ex) {
-//            Logger.getLogger(MainMenuController.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (NotBoundException ex) {
-//            Logger.getLogger(MainMenuController.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+        try {
+            System.out.println("Client started!");
+            Registry registry = LocateRegistry.getRegistry("localhost", RMIServiceHost.RMI_PORT);
+            ToggleService stub = (ToggleService) registry.lookup(ToggleService.REMOTE_OBJECT_NAME);
+            stub.toggleCss();
+        } catch (RemoteException | NotBoundException ex) {
+            Logger.getLogger(MainMenuController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

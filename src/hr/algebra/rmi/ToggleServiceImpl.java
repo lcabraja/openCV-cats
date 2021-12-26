@@ -18,10 +18,7 @@ import javafx.scene.Scene;
 public class ToggleServiceImpl implements ToggleService {
 
     private List<Scene> scenes = new LinkedList<>();
-    private List<String> themes = Arrays.asList(
-            getClass().getResource("../controllers/views/theme1.css").toExternalForm(),
-            getClass().getResource("../controllers/views/theme1.css").toExternalForm()
-    );
+    private List<String> themes = new LinkedList<>();
 
     public void subscribe(Scene scene) {
         scenes.add(scene);
@@ -33,6 +30,8 @@ public class ToggleServiceImpl implements ToggleService {
 
     @Override
     public void toggleCss() throws RemoteException {
+        System.out.println("it work");
+        if (true) return;
         scenes.forEach(scene -> {
             if (scene.getStylesheets().contains(themes.get(0))) {
                 scene.getStylesheets().remove(themes.get(0));
