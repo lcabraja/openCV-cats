@@ -9,6 +9,8 @@ import hr.algebra.OpenCVCats;
 import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.UIStateHolder;
+import hr.algebra.rmi.ToggleService;
+import hr.algebra.serving.Client;
 import hr.algebra.serving.Server;
 import hr.algebra.utils.DocumentationUtils;
 import hr.algebra.utils.FileUtils;
@@ -17,8 +19,16 @@ import hr.algebra.utils.ViewUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -127,16 +137,10 @@ public class MainMenuController implements Initializable {
     }
 
     @FXML
-    public void btnServe() throws IOException {
-        Server.startServer();
-    }
-    
-    @FXML
     public void btnListenToOtherPeopleWorking() throws IOException {
         System.out.println("listenToOtherPeopleWorking @ " + getClass().toString());
         ViewUtils.loadView(getClass().getResource("views/ListenerView.fxml"));
     }
-
 
     @FXML
     private void openLastFile(ActionEvent event) throws IOException {
@@ -163,5 +167,24 @@ public class MainMenuController implements Initializable {
     private void clearSerialization(ActionEvent event) {
         new File(SerializationUtils.UI_SERIALIZATION).delete();
         loadLastValues();
+    }
+
+    @FXML
+    private void makeJndiHappen(ActionEvent event) {
+//        System.out.println("Client started!");
+//        
+//        Registry registry;
+//        try {
+//            registry = LocateRegistry.getRegistry();
+//            System.out.println("Registry retrieved!");
+//            ToggleService server = (ToggleService) registry
+//                .lookup("MessengerService");
+//            System.out.println("Service retrieved!");
+//            server.toggleCss();
+//        } catch (RemoteException ex) {
+//            Logger.getLogger(MainMenuController.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (NotBoundException ex) {
+//            Logger.getLogger(MainMenuController.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 }

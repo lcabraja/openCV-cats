@@ -7,7 +7,11 @@ package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
 import hr.algebra.caching.Cache;
+import hr.algebra.caching.FileCache;
+import hr.algebra.model.CachedFile;
 import hr.algebra.model.DetailedImageViewHolder;
+import hr.algebra.serving.Client;
+import hr.algebra.serving.Server;
 import hr.algebra.utils.ColorUtils;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
@@ -17,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -25,11 +30,13 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.util.Pair;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
@@ -61,6 +68,9 @@ public class DetailedImageViewController implements Initializable {
     private RadioButton rbHaar;
     @FXML
     private RadioButton rbLbp;
+    @FXML
+    private Button btnJNDI;
+
     final ToggleGroup group = new ToggleGroup();
 
     private Cache cache = OpenCVCats.cache;
@@ -82,7 +92,7 @@ public class DetailedImageViewController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
         initFields();
-        analyzeImage();
+        //makeJNDIhappen(); 
     }
 
     private void initFields() {
@@ -111,6 +121,15 @@ public class DetailedImageViewController implements Initializable {
                 } else {
                     detectRects(frame);
                     cache.setFaceRects(setImage, facesArray, faceCascadePath);
+                    CachedFile cachedFile = new CachedFile() {
+                        {
+                            setFilePath(setImage.getAbsolutePath());
+                            setClassifierPath(faceCascadePath);
+                        }
+                    };
+                    Pair<CachedFile, Integer> message
+                            = new Pair<>(cachedFile, facesArray.length);
+                    Client.enqueueMessage(message);
                 }
                 drawRectangles(frame);
                 Image imageToShow = ImageUtils.mat2Image(frame);
@@ -204,11 +223,25 @@ public class DetailedImageViewController implements Initializable {
         radioSelection("resources/lbpcascades/lbpcascade_frontalcatface.xml");
     }
 
+    @FXML
+    protected void btnJNDI() {
+//        try {
+//            OpenCVCats.getJdniService().toggleCss();
+//        } catch (RemoteException ex) {
+//            Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+    }
+
     private void radioSelection(String classifierPath) {
         System.out.println("checkboxSelection @ " + getClass().toString());
         faceCascadePath = classifierPath;
         faceCascade.load(classifierPath);
         analyzeImage();
+    }
+
+    private void makeJNDIhappen() {
+//        btnJNDI.getStyleClass().add("buttonStyle");
+//        OpenCVCats.getJdniService().subscribe(OpenCVCats.getMainStage().sceneProperty().get());
     }
 
 }

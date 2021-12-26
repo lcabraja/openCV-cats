@@ -7,6 +7,7 @@ package hr.algebra.controllers;
 
 import hr.algebra.model.CachedFile;
 import hr.algebra.serving.Client;
+import hr.algebra.serving.Server;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -24,18 +25,26 @@ import org.opencv.core.Rect;
 public class ListenerController implements Initializable {
 
     @FXML
-    private static TextArea taMessageQueue;
+    private TextArea taMessageQueue;
 
+    private static TextArea mq;
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        Client.startListening();
-        Client.setListener(ListenerController::updateText);
+        Server.startServer();
+        Server.setListener(ListenerController::updateText);
+        mq = taMessageQueue;
     }
 
-    public static void updateText(Pair<CachedFile, Rect[]> data) {
+    public static void updateText(String data) {
+        System.out.println(data);
+        System.out.println(mq == null);
+        mq.appendText(data + "\n");
+    }
+
+    public static void updateText2(Pair<CachedFile, Rect[]> data) {
         StringBuilder sb = new StringBuilder();
         sb.append("Analyzed: ");
         sb.append(data.getKey().getFilePath());
@@ -44,7 +53,6 @@ public class ListenerController implements Initializable {
         sb.append(" found ");
         sb.append(data.getValue().length);
         sb.append(" faces.");
-        taMessageQueue.appendText(sb.toString());
+        mq.appendText(sb.toString());
     }
-
 }
