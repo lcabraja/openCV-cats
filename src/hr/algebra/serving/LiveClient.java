@@ -8,7 +8,6 @@ package hr.algebra.serving;
 import hr.algebra.model.SerializableImage;
 import hr.algebra.utils.ImageUtils;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,33 +21,30 @@ import javafx.scene.image.Image;
  *
  * @author lcabraja
  */
-public class Client {
+public class LiveClient {
 
     private static Thread clientThread = null;
 
-    public static void requestImage(File requestedFile, ObjectProperty<Image> canvas) {
-        clientThread = new Thread(() -> sendImageThread(requestedFile, canvas));
+    public static void requestImage(ObjectProperty<Image> canvas) {
+        clientThread = new Thread(() -> sendImageThread(canvas));
         clientThread.start();
     }
 
-    private static void sendImageThread(File requestedFile, ObjectProperty<Image> canvas) {
-        try (Socket clientSocket = new Socket(Server.HOST, Server.PORT)) {
+    private static void sendImageThread(ObjectProperty<Image> canvas) {
+        try (Socket clientSocket = new Socket(LiveServer.HOST, LiveServer.PORT)) {
             System.err.println("Client connecting onto: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
-            send(clientSocket, requestedFile, canvas);
+            send(clientSocket, canvas);
         } catch (IOException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LiveClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private static void send(Socket clientSocket, File requestedFile, ObjectProperty<Image> canvas) {
-        try (
-                ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
-                ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream())) {
-            oos.writeObject(requestedFile);
+    private static void send(Socket clientSocket, ObjectProperty<Image> canvas) {
+        try (ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream())) {
             SerializableImage serializableImage = (SerializableImage) ois.readObject();
             ImageUtils.onFXThread(canvas, serializableImage.getImage());
         } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LiveClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

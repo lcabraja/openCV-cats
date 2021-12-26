@@ -8,6 +8,8 @@ package hr.algebra.controllers;
 import hr.algebra.OpenCVCats;
 import hr.algebra.caching.Cache;
 import hr.algebra.model.DetailedImageViewHolder;
+import hr.algebra.model.SerializableImage;
+import hr.algebra.serving.Client;
 import hr.algebra.utils.ColorUtils;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
@@ -15,7 +17,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -64,7 +69,7 @@ public class DetailedImageViewController implements Initializable {
 
     final ToggleGroup group = new ToggleGroup();
 
-    private Cache cache = OpenCVCats.cache;
+    private final Cache cache = OpenCVCats.cache;
 
     private int absoluteFaceSize = 0;
     private DetailedImageViewHolder holder;
@@ -72,6 +77,7 @@ public class DetailedImageViewController implements Initializable {
     private String faceCascadePath;
     private BufferedImage bufferedImage;
     private File setImage;
+    private Image imageToShow;
 
     Rect[] facesArray;
     private String lastRectColor = null;
@@ -83,6 +89,7 @@ public class DetailedImageViewController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
         initFields();
+        test();
     }
 
     private void initFields() {
@@ -113,7 +120,7 @@ public class DetailedImageViewController implements Initializable {
                     cache.setFaceRects(setImage, facesArray, faceCascadePath);
                 }
                 drawRectangles(frame);
-                Image imageToShow = ImageUtils.mat2Image(frame);
+                imageToShow = ImageUtils.mat2Image(frame);
                 updateImageView(imageToShow);
                 displayStatistics();
             }
@@ -209,5 +216,34 @@ public class DetailedImageViewController implements Initializable {
         faceCascadePath = classifierPath;
         faceCascade.load(classifierPath);
         analyzeImage();
+    }
+
+    private static final String FILE_NAME = "image.ser";
+
+    private void test() {
+        // Test of read/write serialized image to file
+        SerializableImage si = new SerializableImage(imageToShow);
+        try {
+            write(si, FILE_NAME);
+            SerializableImage image = read(FILE_NAME);
+            ImageUtils.onFXThread(modifiedFrameBottom.imageProperty(), image.getImage());
+
+        } catch (IOException | ClassNotFoundException ex) {
+            Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        // Test of read/write serialized image over network
+        Client.requestImage(setImage, modifiedFrameTop.imageProperty());
+    }
+
+    private static void write(SerializableImage image, String fileName) throws IOException {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) { // decorator -> explain
+            oos.writeObject(image);
+        }
+    }
+
+    private static SerializableImage read(String fileName) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
+            return (SerializableImage) ois.readObject();
+        }
     }
 }

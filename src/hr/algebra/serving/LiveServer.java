@@ -22,10 +22,11 @@ import javafx.scene.image.Image;
  *
  * @author lcabraja
  */
-public class Server {
+public class LiveServer {
 
-    public static final int PORT = 12345;
+    public static final int PORT = 23456;
     public static final String HOST = "localhost";
+    public static SerializableImage serializableImage = null;
 
     private static Thread serverThread = null;
 
@@ -51,18 +52,15 @@ public class Server {
         } catch (BindException ex) {
             System.err.println("Unable to bind TCP Port");
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LiveServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private static void processMessage(Socket clientSocket) {
-        try (
-                ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-                ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream())) {
-            File imageToSend = (File) ois.readObject();
-            oos.writeObject(new SerializableImage(new Image(new FileInputStream(imageToSend))));
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        try (ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream())) {
+            oos.writeObject(serializableImage);
+        } catch (IOException ex) {
+            Logger.getLogger(LiveServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
