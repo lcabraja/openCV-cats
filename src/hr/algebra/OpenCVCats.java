@@ -11,12 +11,10 @@ import hr.algebra.model.Descriptor;
 import hr.algebra.rmi.RMIServiceHost;
 import hr.algebra.serving.LiveServer;
 import hr.algebra.serving.Server;
+import hr.algebra.utils.ViewUtils;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javafx.scene.Scene;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.opencv.core.Core;
@@ -55,9 +53,8 @@ public class OpenCVCats extends Application {
     }
 
     private void showMainMenu() throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("controllers/views/MainMenu.fxml"));
-        Scene scene = new Scene(root);
-        getMainStage().setScene(scene);
+        ViewUtils.loadView(getClass().getResource("controllers/views/MainMenu.fxml"));
+        getMainStage().show();
         getMainStage().show();
     }
 
