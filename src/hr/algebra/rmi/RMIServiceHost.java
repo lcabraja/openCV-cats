@@ -23,9 +23,9 @@ public class RMIServiceHost {
     private static final int RANDOM_PORT_HINT = 0;
     public static final int RMI_PORT = 1099;
 
-    private static ToggleService toggleService;
+    private static DirectoryService toggleService;
     private static Registry registry;
-    private static ToggleService skeleton;
+    private static DirectoryService skeleton;
 
     private static boolean isInitialized = false;
 
@@ -44,14 +44,14 @@ public class RMIServiceHost {
     }
 
     private static void initializeServices() {
-        toggleService = new ToggleServiceImpl();
+        toggleService = new DirectoryServiceImpl();
     }
 
     private static void bindObjects() {
         try {
             registry = LocateRegistry.createRegistry(RMI_PORT);
-            skeleton = (ToggleService) UnicastRemoteObject.exportObject(toggleService, RANDOM_PORT_HINT);
-            registry.rebind(ToggleService.REMOTE_OBJECT_NAME, skeleton);
+            skeleton = (DirectoryService) UnicastRemoteObject.exportObject(toggleService, RANDOM_PORT_HINT);
+            registry.rebind(DirectoryService.REMOTE_OBJECT_NAME, skeleton);
             isInitialized = true;
             System.err.println("Object registered in RMI registry");
         } catch (RemoteException ex) {
@@ -66,7 +66,7 @@ public class RMIServiceHost {
     private static void unbindObjects() {
         if (isInitialized) {
             try {
-                registry.unbind(ToggleService.REMOTE_OBJECT_NAME);
+                registry.unbind(DirectoryService.REMOTE_OBJECT_NAME);
                 UnicastRemoteObject.unexportObject(toggleService, true);
                 UnicastRemoteObject.unexportObject(registry, true);
 
