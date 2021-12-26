@@ -5,12 +5,19 @@
  */
 package hr.algebra.serving;
 
+import hr.algebra.model.SerializableImage;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.image.Image;
 
 /**
  *
@@ -42,17 +49,20 @@ public class Server {
                 System.err.println("Client connected from port:  " + clientSocket.getPort());
                 new Thread(() -> processMessage(clientSocket)).start();
             }
+        } catch (BindException ex) {
+            System.err.println("Unable to bind TCP Port");
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     private static void processMessage(Socket clientSocket) {
-        try (ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream())) {
-            do {
-                //TODO: reimplement server
-            } while (ois.available() > 0);
-        } catch (IOException ex) {
+        try (
+                ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
+                ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream())) {
+            File imageToSend = (File) ois.readObject();
+            oos.writeObject(new SerializableImage(new Image(new FileInputStream(imageToSend))));
+        } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
