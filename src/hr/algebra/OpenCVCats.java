@@ -9,6 +9,7 @@ import hr.algebra.caching.Cache;
 import hr.algebra.caching.MemCache;
 import hr.algebra.model.Descriptor;
 import hr.algebra.rmi.RMIServiceHost;
+import hr.algebra.serving.LiveServer;
 import hr.algebra.serving.Server;
 import java.io.IOException;
 import javafx.application.Application;
@@ -49,6 +50,7 @@ public class OpenCVCats extends Application {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         RMIServiceHost.startServices();
         Server.startServer();
+        LiveServer.startServer();
         launch(args);
     }
 
@@ -66,7 +68,9 @@ public class OpenCVCats extends Application {
             try {
                 RMIServiceHost.stopServices();
                 Server.stopServer();
+                LiveServer.stopServer();
                 stop();
+                System.exit(0);
             } catch (Exception ex) {
                 System.exit(1);
             }

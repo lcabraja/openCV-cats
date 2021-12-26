@@ -5,14 +5,14 @@
  */
 package hr.algebra.controllers;
 
-import hr.algebra.OpenCVCats;
-import hr.algebra.model.DetailedImageViewHolder;
+import hr.algebra.model.SerializableImage;
+import hr.algebra.serving.LiveClient;
+import hr.algebra.serving.LiveServer;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
@@ -20,12 +20,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.WindowEvent;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
@@ -55,14 +53,14 @@ public class CameraImageViewController implements Initializable {
     @FXML
     private ImageView originalFrame;
     private VideoCapture capture;
-    private Boolean cameraActive;
+    private boolean hasCamera = true;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        this.capture = new VideoCapture();
+        this.capture = new VideoCapture(0);
         faceCascade = new CascadeClassifier();
         faceCascade.load("resources/haarcascades/haarcascade_frontalcatface.xml"); // selects the haar cascade as the default cascade
         try {
@@ -74,37 +72,41 @@ public class CameraImageViewController implements Initializable {
 
     private void runCamera() throws FileNotFoundException {
 
-        capture.open(0);
+        Runnable imageUpdater = () -> {
+            System.out.println("runnable @ " + getClass().toString());
+            Mat frame = new Mat();
 
-        if (this.capture.isOpened()) {
-            cameraActive = true;
-            Runnable imageUpdater = () -> {
-                System.out.println("runnable @ " + getClass().toString());
-                Mat frame = new Mat();
+            try {
+                // read the current frame
+                if (hasCamera) {
 
-                // check if the capture is open
-                if (this.capture.isOpened()) {
-                    try {
-                        // read the current frame
-                        this.capture.read(frame);
+                    this.capture.read(frame);
 
-                        // if the frame is not empty, process it
-                        if (!frame.empty()) {
-                            // face detection
-                            detectAndDisplay(frame);
-                            Image imageToShow = ImageUtils.mat2Image(frame);
-                            ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
-                        }
-                    } catch (Exception e) {
-                        // log the (full) error
-                        System.err.println("Exception during the image elaboration: " + e);
+                    // if the frame is not empty, process it
+                    if (!frame.empty()) {
+                        System.out.println("test");
+                        // face detection
+                        detectAndDisplay(frame);
+                        Image imageToShow = ImageUtils.mat2Image(frame);
+                        ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
+                        LiveServer.serializableImage = new SerializableImage(imageToShow);
+                    } else {
+                        hasCamera = false;
                     }
+                } else {
+                    System.out.println("yo yo");
+                    LiveClient.requestImage(originalFrame.imageProperty());
                 }
-            };
+            } catch (Exception e) {
+                // log the (full) error
+                System.err.println("Exception during the image elaboration: " + e);
+            }
+        };
 
-            timer = Executors.newSingleThreadScheduledExecutor();
-            timer.scheduleAtFixedRate(imageUpdater, 0, 500, TimeUnit.MILLISECONDS);
-        }
+        timer = Executors.newSingleThreadScheduledExecutor();
+
+        timer.scheduleAtFixedRate(imageUpdater,
+                0, 100, TimeUnit.MILLISECONDS);
     }
 
     private void detectAndDisplay(Mat frame) {
@@ -149,6 +151,7 @@ public class CameraImageViewController implements Initializable {
     @FXML
     private void goBack() throws IOException {
         System.out.println("goBack @ " + getClass().toString());
+        stopAcquisition();
         ViewUtils.loadView(getClass().getResource("views/MainMenu.fxml"));
     }
 
