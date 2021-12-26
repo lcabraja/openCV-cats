@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.opencv.core.Core;
 
@@ -57,7 +58,8 @@ public class OpenCVCats extends Application {
     }
 
     private void initStage(Stage primaryStage) {
-
+        primaryStage.setResizable(false);
+        primaryStage.initStyle(StageStyle.UTILITY);
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
             try {
                 RMIServiceHost.stopServices();

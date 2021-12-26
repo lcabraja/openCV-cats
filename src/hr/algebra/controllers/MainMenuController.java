@@ -9,8 +9,6 @@ import hr.algebra.OpenCVCats;
 import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.UIStateHolder;
-import hr.algebra.rmi.RMIServiceHost;
-import hr.algebra.rmi.ToggleService;
 import hr.algebra.utils.DocumentationUtils;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.SerializationUtils;
@@ -18,14 +16,8 @@ import hr.algebra.utils.ViewUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -134,6 +126,10 @@ public class MainMenuController implements Initializable {
     }
 
     @FXML
+    private void connectToNetwork(ActionEvent event) {
+    }
+    
+    @FXML
     private void openLastFile(ActionEvent event) throws IOException {
         if (state.isPresent() && state.get().getLastFile().isPresent()) {
             OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
@@ -154,6 +150,10 @@ public class MainMenuController implements Initializable {
         }
     }
 
+    @FXML
+    private void openSettings(ActionEvent event) {
+    }
+    
     @FXML
     private void clearSerialization(ActionEvent event) {
         new File(SerializationUtils.UI_SERIALIZATION).delete();
