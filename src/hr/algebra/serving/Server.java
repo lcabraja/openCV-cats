@@ -5,18 +5,12 @@
  */
 package hr.algebra.serving;
 
-import hr.algebra.model.CachedFile;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.util.Pair;
 
 /**
  *
