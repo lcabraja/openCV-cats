@@ -12,6 +12,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -36,9 +38,8 @@ public class SerializationUtils {
         try (ObjectOutputStream oos
                 = new ObjectOutputStream(new FileOutputStream(location))) {
             oos.writeObject(serializableItem);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch (IOException ex) {
+            Logger.getLogger(SerializationUtils.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
-
 }

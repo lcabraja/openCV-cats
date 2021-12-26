@@ -99,19 +99,17 @@ public class BulkImageViewController implements Initializable {
     private void goToDetailsPage() throws IOException {
         System.out.println("goToDetailsPage @ " + getClass().toString());
         Optional<File> uploadFile = getSelectedFile();
-        if (uploadFile.isPresent()) {
-            OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
-                    getClass().getResource("views/BulkImageView.fxml"),
-                    uploadFile.get(),
-                    new BulkImageViewHolder(
-                            holder.getSelectedDirectory(),
-                            lvItems.getSelectionModel().getSelectedIndex()
-                    )
-            ));
-        } else {
+        if (!uploadFile.isPresent()) {
             return;
         }
-        final String view = "views/DetailedImageView.fxml";
+        OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
+                getClass().getResource("views/BulkImageView.fxml"),
+                uploadFile.get(),
+                new BulkImageViewHolder(
+                        holder.getSelectedDirectory(),
+                        lvItems.getSelectionModel().getSelectedIndex()
+                )
+        ));
         ViewUtils.loadView(getClass().getResource("views/DetailedImageView.fxml"));
     }
 
@@ -125,8 +123,9 @@ public class BulkImageViewController implements Initializable {
         try {
             File selectedFile = getSelectedImageFile();
             InputStream is = new FileInputStream(selectedFile);
+            is.close();
             return Optional.of(selectedFile);
-        } catch (FileNotFoundException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(BulkImageViewController.class.getName()).log(Level.SEVERE, null, ex);
             return Optional.empty();
         }

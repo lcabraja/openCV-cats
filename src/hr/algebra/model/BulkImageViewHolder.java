@@ -14,8 +14,8 @@ import java.util.Optional;
  */
 public class BulkImageViewHolder {
 
-    private File selectedDirectory;
-    private Optional<Integer> selectedIndex;
+    private final File selectedDirectory;
+    private final Optional<Integer> selectedIndex;
 
     public BulkImageViewHolder(File selectedDirectory) {
         this.selectedDirectory = selectedDirectory;

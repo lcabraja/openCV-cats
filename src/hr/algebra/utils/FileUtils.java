@@ -5,9 +5,7 @@
  */
 package hr.algebra.utils;
 
-import hr.algebra.OpenCVCats;
 import java.io.File;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javafx.stage.DirectoryChooser;

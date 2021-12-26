@@ -11,8 +11,6 @@ import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.UIStateHolder;
 import hr.algebra.rmi.RMIServiceHost;
 import hr.algebra.rmi.ToggleService;
-import hr.algebra.serving.Client;
-import hr.algebra.serving.Server;
 import hr.algebra.utils.DocumentationUtils;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.SerializationUtils;
@@ -20,13 +18,10 @@ import hr.algebra.utils.ViewUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -139,12 +134,6 @@ public class MainMenuController implements Initializable {
     }
 
     @FXML
-    public void btnListenToOtherPeopleWorking() throws IOException {
-        System.out.println("listenToOtherPeopleWorking @ " + getClass().toString());
-        ViewUtils.loadView(getClass().getResource("views/ListenerView.fxml"));
-    }
-
-    @FXML
     private void openLastFile(ActionEvent event) throws IOException {
         if (state.isPresent() && state.get().getLastFile().isPresent()) {
             OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
@@ -169,17 +158,5 @@ public class MainMenuController implements Initializable {
     private void clearSerialization(ActionEvent event) {
         new File(SerializationUtils.UI_SERIALIZATION).delete();
         loadLastValues();
-    }
-
-    @FXML
-    private void makeJndiHappen(ActionEvent event) {
-        try {
-            System.out.println("Client started!");
-            Registry registry = LocateRegistry.getRegistry("localhost", RMIServiceHost.RMI_PORT);
-            ToggleService stub = (ToggleService) registry.lookup(ToggleService.REMOTE_OBJECT_NAME);
-            stub.toggleCss();
-        } catch (RemoteException | NotBoundException ex) {
-            Logger.getLogger(MainMenuController.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }

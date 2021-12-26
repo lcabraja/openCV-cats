@@ -27,20 +27,4 @@ public class ToggleServiceImpl implements ToggleService {
     public void unsubscribe(Scene scene) {
         scenes.remove(scene);
     }
-
-    @Override
-    public void toggleCss() throws RemoteException {
-        System.out.println("it work");
-        if (true) return;
-        scenes.forEach(scene -> {
-            if (scene.getStylesheets().contains(themes.get(0))) {
-                scene.getStylesheets().remove(themes.get(0));
-                scene.getStylesheets().add(themes.get(1));
-            } else {
-                scene.getStylesheets().remove(themes.get(1));
-                scene.getStylesheets().add(themes.get(0));
-            }
-        });
-    }
-
 }

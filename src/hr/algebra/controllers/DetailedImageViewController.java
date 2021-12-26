@@ -65,8 +65,6 @@ public class DetailedImageViewController implements Initializable {
     private RadioButton rbHaar;
     @FXML
     private RadioButton rbLbp;
-    @FXML
-    private Button btnJNDI;
 
     final ToggleGroup group = new ToggleGroup();
 
@@ -89,7 +87,6 @@ public class DetailedImageViewController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
         initFields();
-        //makeJNDIhappen(); 
     }
 
     private void initFields() {
@@ -118,15 +115,6 @@ public class DetailedImageViewController implements Initializable {
                 } else {
                     detectRects(frame);
                     cache.setFaceRects(setImage, facesArray, faceCascadePath);
-                    CachedFile cachedFile = new CachedFile() {
-                        {
-                            setFilePath(setImage.getAbsolutePath());
-                            setClassifierPath(faceCascadePath);
-                        }
-                    };
-                    Pair<CachedFile, Integer> message
-                            = new Pair<>(cachedFile, facesArray.length);
-                    Client.enqueueMessage(message);
                 }
                 drawRectangles(frame);
                 Image imageToShow = ImageUtils.mat2Image(frame);
@@ -220,25 +208,10 @@ public class DetailedImageViewController implements Initializable {
         radioSelection("resources/lbpcascades/lbpcascade_frontalcatface.xml");
     }
 
-    @FXML
-    protected void btnJNDI() {
-//        try {
-//            OpenCVCats.getJdniService().toggleCss();
-//        } catch (RemoteException ex) {
-//            Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-    }
-
     private void radioSelection(String classifierPath) {
         System.out.println("checkboxSelection @ " + getClass().toString());
         faceCascadePath = classifierPath;
         faceCascade.load(classifierPath);
         analyzeImage();
     }
-
-    private void makeJNDIhappen() {
-//        btnJNDI.getStyleClass().add("buttonStyle");
-//        OpenCVCats.getJdniService().subscribe(OpenCVCats.getMainStage().sceneProperty().get());
-    }
-
 }

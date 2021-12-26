@@ -32,7 +32,7 @@ public class DocumentationUtils {
 
     public static void generateDocumentation() {
         System.out.println("generirajDokumentaciju @ " + DocumentationUtils.class.toString());
-        
+
         StringBuilder builder = new StringBuilder();
 
         builder.append("<!DOCTYPE html>\n");

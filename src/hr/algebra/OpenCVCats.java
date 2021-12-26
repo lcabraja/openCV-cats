@@ -11,7 +11,6 @@ import hr.algebra.model.Descriptor;
 import hr.algebra.rmi.RMIServiceHost;
 import java.io.IOException;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
@@ -25,7 +24,6 @@ import org.opencv.core.Core;
  */
 public class OpenCVCats extends Application {
 
-//    public static Cache cache = new MemCache();
     public static Cache cache = new MemCache();
     private static Stage mainStage;
 
@@ -37,7 +35,6 @@ public class OpenCVCats extends Application {
     public void start(Stage primaryStage) throws IOException, InterruptedException {
         initStage(primaryStage);
         mainStage = primaryStage;
-//        FXTesting.start(primaryStage); System.exit(0); if (true) return;
         showMainMenu();
     }
 
@@ -45,13 +42,13 @@ public class OpenCVCats extends Application {
      *
      * @param args the command line arguments
      */
+    @Descriptor("Main method")
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         RMIServiceHost.startServices();
         launch(args);
     }
 
-    @Descriptor("Test")
     private void showMainMenu() throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("controllers/views/MainMenu.fxml"));
         Scene scene = new Scene(root);
@@ -62,13 +59,11 @@ public class OpenCVCats extends Application {
     private void initStage(Stage primaryStage) {
 
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
-            System.out.println("boku no here");
-            RMIServiceHost.stopServices();
             try {
+                RMIServiceHost.stopServices();
                 stop();
             } catch (Exception ex) {
-                System.err.println("Forcibly exiting ...");
-                Platform.exit();
+                System.exit(1);
             }
         });
     }

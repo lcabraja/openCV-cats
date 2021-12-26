@@ -15,7 +15,7 @@ import org.opencv.core.Scalar;
  */
 public class ColorUtils {
 
-    private static final Random r = new Random();
+    private static final Random R = new Random();
     private static final String[] STATIC_COLOR_LIST = {
         "ff0000", "00ff00", "0000ff", "ffff00", "ff00ff", "00ffff", "000000",
         "800000", "008000", "000080", "808000", "800080", "008080", "808080",
@@ -63,7 +63,7 @@ public class ColorUtils {
     }
 
     public static String gettRandomColorHex() {
-        return STATIC_COLOR_LIST[r.nextInt(STATIC_COLOR_LIST.length)];
+        return STATIC_COLOR_LIST[R.nextInt(STATIC_COLOR_LIST.length)];
     }
 
     public static String getDeterministicColorHex() {

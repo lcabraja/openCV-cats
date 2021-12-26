@@ -45,10 +45,7 @@ public class CameraImageViewController implements Initializable {
 
     private CascadeClassifier faceCascade;
     private int absoluteFaceSize;
-    private BufferedImage bufferedImage;
     private ScheduledExecutorService timer;
-    private DetailedImageViewHolder lastState;
-    private File setImage;
 
     @FXML
     private ImageView modifiedFrameTop;
@@ -81,16 +78,8 @@ public class CameraImageViewController implements Initializable {
 
         if (this.capture.isOpened()) {
             cameraActive = true;
-            //bufferedImage = SwingFXUtils.fromFXImage(image, null);
-            OpenCVCats.getMainStage()
-                    .setOnCloseRequest((WindowEvent t) -> {
-                        Platform.exit();
-                        System.exit(0);
-                    });
-
             Runnable imageUpdater = () -> {
                 System.out.println("runnable @ " + getClass().toString());
-
                 Mat frame = new Mat();
 
                 // check if the capture is open
@@ -105,7 +94,6 @@ public class CameraImageViewController implements Initializable {
                             detectAndDisplay(frame);
                             Image imageToShow = ImageUtils.mat2Image(frame);
                             ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
-
                         }
                     } catch (Exception e) {
                         // log the (full) error
