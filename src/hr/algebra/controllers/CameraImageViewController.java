@@ -12,7 +12,6 @@ import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
@@ -41,6 +40,10 @@ import org.opencv.videoio.VideoCapture;
  */
 public class CameraImageViewController implements Initializable {
 
+    private static int maxTested = 10;
+    private static int cameraCount;
+    private int currentCamera = 0;
+
     private CascadeClassifier faceCascade;
     private int absoluteFaceSize;
     private ScheduledExecutorService timer;
@@ -58,9 +61,28 @@ public class CameraImageViewController implements Initializable {
     /**
      * Initializes the controller class.
      */
+    int countCameras() {
+        VideoCapture temp_camera = new VideoCapture(0);
+
+        for (int i = 1; i < maxTested; i++) {
+            boolean res = (!temp_camera.isOpened());
+            temp_camera.release();
+            temp_camera.open(i);
+            if (res) {
+                System.out.println("nothing on " + i);
+            }
+        }
+        temp_camera.release();
+        return maxTested;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        this.capture = new VideoCapture(0);
+        cameraCount = countCameras();
+        if (cameraCount > 0) {
+            this.capture = new VideoCapture(7);
+        }
+        System.out.println("cameras " + countCameras());
         faceCascade = new CascadeClassifier();
         faceCascade.load("resources/haarcascades/haarcascade_frontalcatface.xml"); // selects the haar cascade as the default cascade
         try {
@@ -78,7 +100,7 @@ public class CameraImageViewController implements Initializable {
 
             try {
                 // read the current frame
-                if (hasCamera) {
+                if (cameraCount > 0 && hasCamera) {
 
                     this.capture.read(frame);
 
@@ -91,15 +113,20 @@ public class CameraImageViewController implements Initializable {
                         ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
                         LiveServer.serializableImage = new SerializableImage(imageToShow);
                     } else {
-                        hasCamera = false;
+                        if (currentCamera >= cameraCount) {
+                            hasCamera = false;
+                        } else {
+                            this.capture.release();
+                            this.capture.open(++cameraCount);
+                        }
                     }
                 } else {
-                    System.out.println("yo yo");
+                    System.out.println("Reguesting new image frame");
                     LiveClient.requestImage(originalFrame.imageProperty());
                 }
             } catch (Exception e) {
                 // log the (full) error
-                System.err.println("Exception during the image elaboration: " + e);
+                System.err.println("Exception during the image capture: " + e);
             }
         };
 

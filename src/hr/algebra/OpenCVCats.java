@@ -60,7 +60,7 @@ public class OpenCVCats extends Application {
 
     private void initStage(Stage primaryStage) {
         primaryStage.setResizable(false);
-        primaryStage.initStyle(StageStyle.UTILITY);
+        primaryStage.initStyle(StageStyle.UNIFIED);
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
             try {
                 RMIServiceHost.stopServices();

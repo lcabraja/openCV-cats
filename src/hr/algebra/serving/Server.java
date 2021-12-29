@@ -49,7 +49,7 @@ public class Server {
                 new Thread(() -> processMessage(clientSocket)).start();
             }
         } catch (BindException ex) {
-            System.err.println("Unable to bind TCP Port");
+            System.err.println("Unable to bind TCP Port " + PORT);
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }

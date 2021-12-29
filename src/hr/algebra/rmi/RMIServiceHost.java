@@ -69,7 +69,6 @@ public class RMIServiceHost {
                 registry.unbind(DirectoryService.REMOTE_OBJECT_NAME);
                 UnicastRemoteObject.unexportObject(toggleService, true);
                 UnicastRemoteObject.unexportObject(registry, true);
-
             } catch (RemoteException | NotBoundException ex) {
                 Logger.getLogger(RMIServiceHost.class.getName()).log(Level.SEVERE, null, ex);
             }

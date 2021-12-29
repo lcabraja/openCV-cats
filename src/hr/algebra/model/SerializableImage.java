@@ -36,7 +36,6 @@ public class SerializableImage implements Serializable {
         this.image = image;
     }
 
-    // other fields, etc...
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
         s.defaultReadObject();
         image = SwingFXUtils.toFXImage(ImageIO.read(s), null);

@@ -6,10 +6,10 @@
 package hr.algebra.rmi;
 
 import hr.algebra.model.CachedFile;
+import java.awt.Rectangle;
 import java.rmi.RemoteException;
 import java.util.List;
 import javafx.util.Pair;
-import org.opencv.core.Rect;
 
 /**
  *
@@ -28,7 +28,13 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public Pair<CachedFile, Rect[]> getImageData() throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Pair<CachedFile, Rectangle[]> getImageData() throws RemoteException {
+        CachedFile cf = new CachedFile();
+        cf.setClassifierPath(REMOTE_OBJECT_NAME);
+        cf.setFilePath("filepath");
+        return new Pair<>(cf, new Rectangle[]{
+            new Rectangle(1, 2, 3, 4),
+            new Rectangle(5, 6, 7, 8)
+        });
     }
 }
