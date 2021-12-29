@@ -9,6 +9,7 @@ import hr.algebra.OpenCVCats;
 import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.UIStateHolder;
+import hr.algebra.rmi.DirectoryClient;
 import hr.algebra.utils.DocumentationUtils;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.SerializationUtils;
@@ -128,7 +129,7 @@ public class MainMenuController implements Initializable {
     @FXML
     private void connectToNetwork(ActionEvent event) {
     }
-    
+
     @FXML
     private void openLastFile(ActionEvent event) throws IOException {
         if (state.isPresent() && state.get().getLastFile().isPresent()) {
@@ -152,8 +153,9 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void openSettings(ActionEvent event) {
+        new DirectoryClient();
     }
-    
+
     @FXML
     private void clearSerialization(ActionEvent event) {
         new File(SerializationUtils.UI_SERIALIZATION).delete();

@@ -6,12 +6,15 @@
 package hr.algebra.caching;
 
 import hr.algebra.model.CachedFile;
+import hr.algebra.utils.OCVUtils;
 import hr.algebra.utils.SerializationUtils;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.opencv.core.Rect;
 
 /**
@@ -54,9 +57,16 @@ public class FileCache implements Cache {
 
     private Optional<Map<CachedFile, Rect[]>> getSerializedFile() {
         System.out.println("getSerializedFile @ " + getClass().toString());
-        Optional<Map<CachedFile, Rect[]>> serializedFile
-                = SerializationUtils.<Map<CachedFile, Rect[]>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
-        return serializedFile;
+        Optional<Map<CachedFile, Rectangle[]>> serializedFile
+                = SerializationUtils.<Map<CachedFile, Rectangle[]>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
+        if (serializedFile.isPresent()) {
+            Map<CachedFile, Rect[]> convertMap = new HashMap<>();
+            for (Map.Entry<CachedFile, Rectangle[]> entry : serializedFile.get().entrySet()) {
+                convertMap.put(entry.getKey(), OCVUtils.rectangleArrayToRectArray(entry.getValue()));
+            }
+            return Optional.of(convertMap);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -72,11 +82,16 @@ public class FileCache implements Cache {
         Map<CachedFile, Rect[]> previousSerialization;
         if (contains(imageFile, classifierPath)) {
             previousSerialization = getSerializedFile().get();
-            previousSerialization.put(cf, facesArray);
         } else {
             previousSerialization = new HashMap<>();
         }
-        SerializationUtils.updateSerializedItem((Serializable) previousSerialization, SerializationUtils.RECT_SERIALIZATION);
+        previousSerialization.put(cf, facesArray);
+
+        Map<CachedFile, Rectangle[]> convertMap = new HashMap<>();
+        for (Map.Entry<CachedFile, Rect[]> entry : previousSerialization.entrySet()) {
+            convertMap.put(entry.getKey(), OCVUtils.rectArrayToRectangleArray(entry.getValue()));
+        }
+        SerializationUtils.updateSerializedItem((Serializable) convertMap, SerializationUtils.RECT_SERIALIZATION);
     }
 
 }

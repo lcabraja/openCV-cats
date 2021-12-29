@@ -6,11 +6,11 @@
 package hr.algebra.rmi;
 
 import hr.algebra.model.CachedFile;
+import java.awt.Rectangle;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import javafx.util.Pair;
-import org.opencv.core.Rect;
 
 /**
  *
@@ -24,5 +24,5 @@ public interface DirectoryService extends Remote {
 
     public List<String> getFiles() throws RemoteException;
 
-    public Pair<CachedFile, Rect[]> getImageData() throws RemoteException;
+    public Pair<CachedFile, Rectangle[]> getImageData() throws RemoteException;
 }

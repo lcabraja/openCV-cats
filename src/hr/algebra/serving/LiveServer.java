@@ -50,7 +50,7 @@ public class LiveServer {
                 new Thread(() -> processMessage(clientSocket)).start();
             }
         } catch (BindException ex) {
-            System.err.println("Unable to bind TCP Port");
+            System.err.println("Unable to bind TCP Port " + PORT);
         } catch (IOException ex) {
             Logger.getLogger(LiveServer.class.getName()).log(Level.SEVERE, null, ex);
         }
