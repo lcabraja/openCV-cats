@@ -56,7 +56,7 @@ public class RMIServiceHost {
             System.err.println("Object registered in RMI registry");
         } catch (RemoteException ex) {
             if (ex.getCause() instanceof BindException) {
-                System.err.println("Unable to bind RMI Port");
+                System.err.println("Unable to bind RMI Port " + RMI_PORT);
                 return;
             }
             Logger.getLogger(RMIServiceHost.class.getName()).log(Level.SEVERE, null, ex);

@@ -7,6 +7,7 @@ package hr.algebra.rmi;
 
 import hr.algebra.model.CachedFile;
 import java.awt.Rectangle;
+import java.io.File;
 import java.rmi.RemoteException;
 import java.util.List;
 import javafx.util.Pair;
@@ -18,6 +19,7 @@ import javafx.util.Pair;
 public class DirectoryServiceImpl implements DirectoryService {
 
     private static List<String> files = null;
+    private static String directory = null;
 
     public static List<String> getStaticFiles() {
         System.out.println("getStaticFiles @ " + DirectoryServiceImpl.class);
@@ -29,10 +31,20 @@ public class DirectoryServiceImpl implements DirectoryService {
         DirectoryServiceImpl.files = files;
     }
 
+    public static String getStaticDirectory() {
+        System.out.println("getStaticDirectory @ " + DirectoryServiceImpl.class);
+        return directory;
+    }
+
+    public static void setStaticDirectory(String directoryPath) {
+        System.out.println("setStaticDirectory @ " + DirectoryServiceImpl.class + " " + directoryPath);
+        directory = directoryPath;
+    }
+
     @Override
     public String getDirectoryPath() throws RemoteException {
         System.out.println("getDirectoryPath @ " + getClass().toString());
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return directory;
     }
 
     @Override
