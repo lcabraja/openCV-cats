@@ -21,26 +21,26 @@ import javafx.util.Pair;
  */
 public class DirectoryClient {
 
+    public static final int PORT = 1099;
+    public static final String HOSTNAME = "localhost";
+
     private Registry registry;
     private DirectoryService stub;
 
     public DirectoryClient() {
         try {
-            System.out.println("Initializing registry");
-            registry = LocateRegistry.getRegistry("localhost", 1099);
+            System.out.println("Locating registry on " + HOSTNAME + ":" + PORT);
+            registry = LocateRegistry.getRegistry(HOSTNAME, PORT);
             System.out.println("Initializaing stub");
             stub = (DirectoryService) registry.lookup(DirectoryService.REMOTE_OBJECT_NAME);
-            handleRemoteCalls(stub);
-        } catch (RemoteException ex) {
-            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NotBoundException ex) {
+        } catch (RemoteException | NotBoundException ex) {
             Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void handleRemoteCalls(DirectoryService remoteService) throws RemoteException {
+    public void handleRemoteCalls() throws RemoteException {
         System.out.println("Calling stub");
-        Pair<CachedFile, Rectangle[]> imageData = remoteService.getImageData();
+        Pair<CachedFile, Rectangle[]> imageData = stub.getImageData();
         System.out.println("Result: " + imageData);
         for (Rectangle object : imageData.getValue()) {
             System.out.println(object);

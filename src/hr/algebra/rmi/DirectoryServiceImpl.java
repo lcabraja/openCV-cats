@@ -17,18 +17,33 @@ import javafx.util.Pair;
  */
 public class DirectoryServiceImpl implements DirectoryService {
 
+    private static List<String> files = null;
+
+    public static List<String> getStaticFiles() {
+        System.out.println("getStaticFiles @ " + DirectoryServiceImpl.class);
+        return files;
+    }
+
+    public static void setStaticFiles(List<String> files) {
+        System.out.println("setStaticFiles @ " + DirectoryServiceImpl.class);
+        DirectoryServiceImpl.files = files;
+    }
+
     @Override
     public String getDirectoryPath() throws RemoteException {
+        System.out.println("getDirectoryPath @ " + getClass().toString());
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public List<String> getFiles() throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.out.println("getFiles @ " + getClass().toString());
+        return files;
     }
 
     @Override
     public Pair<CachedFile, Rectangle[]> getImageData() throws RemoteException {
+        System.out.println("getImageData @ " + getClass().toString());
         CachedFile cf = new CachedFile();
         cf.setClassifierPath(REMOTE_OBJECT_NAME);
         cf.setFilePath("filepath");

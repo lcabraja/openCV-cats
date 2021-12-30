@@ -10,6 +10,7 @@ import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.UIStateHolder;
 import hr.algebra.rmi.DirectoryClient;
+import hr.algebra.rmi.DirectoryService;
 import hr.algebra.utils.DocumentationUtils;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.SerializationUtils;
@@ -17,8 +18,14 @@ import hr.algebra.utils.ViewUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -88,10 +95,12 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void openDocumentation() {
+        System.out.println("openDocumentation @ " + getClass().toString());
         DocumentationUtils.generateDocumentation();
     }
 
     private void loadLastValues() {
+        System.out.println("loadLastValues @ " + getClass().toString());
         Optional<UIStateHolder> serializedFile
                 = SerializationUtils.<UIStateHolder>fetchSerializaedItem(SerializationUtils.UI_SERIALIZATION);
         if (serializedFile.isPresent()) {
@@ -107,6 +116,7 @@ public class MainMenuController implements Initializable {
     }
 
     private void saveLastDirectory(String folder) {
+        System.out.println("saveLastDirectory @ " + getClass().toString());
         UIStateHolder newState;
         if (state.isPresent()) {
             newState = new UIStateHolder(state.get().getLastFile(), Optional.of(folder));
@@ -117,6 +127,7 @@ public class MainMenuController implements Initializable {
     }
 
     private void saveLastFile(String file) {
+        System.out.println("saveLastFile @ " + getClass().toString());
         UIStateHolder newState;
         if (state.isPresent()) {
             newState = new UIStateHolder(Optional.of(file), state.get().getLastFolder());
@@ -128,10 +139,17 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void connectToNetwork(ActionEvent event) {
+        System.out.println("connectToNetwork @ " + getClass().toString());
+        try {
+            new DirectoryClient().handleRemoteCalls();
+        } catch (RemoteException ex) {
+            Logger.getLogger(MainMenuController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @FXML
     private void openLastFile(ActionEvent event) throws IOException {
+        System.out.println("openLastFile @ " + getClass().toString());
         if (state.isPresent() && state.get().getLastFile().isPresent()) {
             OpenCVCats.getMainStage().setUserData(new DetailedImageViewHolder(
                     getClass().getResource("views/MainMenu.fxml"),
@@ -143,6 +161,7 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void openLastFolder(ActionEvent event) throws IOException {
+        System.out.println("openLastFolder @ " + getClass().toString());
         if (state.isPresent() && state.get().getLastFolder().isPresent()) {
             OpenCVCats.getMainStage().setUserData(
                     new BulkImageViewHolder(
@@ -153,11 +172,12 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void openSettings(ActionEvent event) {
-        new DirectoryClient();
+        System.out.println("openSettings @ " + getClass().toString());
     }
 
     @FXML
     private void clearSerialization(ActionEvent event) {
+        System.out.println("clearSerialization @ " + getClass().toString());
         new File(SerializationUtils.UI_SERIALIZATION).delete();
         loadLastValues();
     }

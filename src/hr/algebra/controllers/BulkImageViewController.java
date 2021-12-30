@@ -8,6 +8,7 @@ package hr.algebra.controllers;
 import hr.algebra.OpenCVCats;
 import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
+import hr.algebra.rmi.DirectoryServiceImpl;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.ViewUtils;
 import java.io.File;
@@ -17,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -50,9 +52,12 @@ public class BulkImageViewController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
         try {
+            // get directory path
             holder = ((BulkImageViewHolder) OpenCVCats.getMainStage().getUserData());
+            // get list of files
             FileFilter fileFilter
                     = (File dir) -> dir.isFile() && FileUtils.extensionOf(dir, FileUtils.Extensions.JPG);
+            // format as list
             File[] list = holder.getSelectedDirectory().listFiles(fileFilter);
             ObservableList<String> oblist = FXCollections.observableArrayList();
             Stream.of(list).forEach((item) -> {
@@ -67,6 +72,8 @@ public class BulkImageViewController implements Initializable {
                 lvItems.scrollTo(index);
                 updateImage();
             }
+            // set RMI list
+            DirectoryServiceImpl.setStaticFiles(new ArrayList<>(oblist));
         } catch (FileNotFoundException e) {
             System.out.println("initialize.catch @ " + getClass().toString() + "\n\t" + e.toString());
         }
