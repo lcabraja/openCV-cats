@@ -46,10 +46,15 @@ public class OpenCVCats extends Application {
     @Descriptor("Main method")
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        initProcess();
+        launch(args);
+    }
+
+    private static void initProcess() {
         RMIServiceHost.startServices();
         Server.startServer();
         LiveServer.startServer();
-        launch(args);
+
     }
 
     private void showMainMenu() throws IOException {
@@ -61,6 +66,7 @@ public class OpenCVCats extends Application {
     private void initStage(Stage primaryStage) {
         primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.UNIFIED);
+        primaryStage.setTitle(generateWindowTitle());
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
             try {
                 RMIServiceHost.stopServices();
@@ -72,6 +78,23 @@ public class OpenCVCats extends Application {
                 System.exit(1);
             }
         });
+    }
+
+    private String generateWindowTitle() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(RMIServiceHost.isInitialized() ? "1" : "0");
+        sb.append(Server.isInitialized() ? "1" : "0");
+        sb.append(LiveServer.isInitialized() ? "1" : "0");
+        sb.append(" ");
+        sb.append("RMI: ");
+        sb.append(RMIServiceHost.isInitialized());
+        sb.append(" ");
+        sb.append("TCP: ");
+        sb.append(Server.isInitialized());
+        sb.append(" ");
+        sb.append("Live: ");
+        sb.append(LiveServer.isInitialized());
+        return sb.toString();
     }
 
 }

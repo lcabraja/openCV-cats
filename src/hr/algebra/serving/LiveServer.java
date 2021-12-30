@@ -30,6 +30,12 @@ public class LiveServer {
 
     private static Thread serverThread = null;
 
+    private static boolean initialized = false;
+
+    public static boolean isInitialized() {
+        return initialized;
+    }
+
     public static void startServer() {
         if (serverThread == null) {
             serverThread = new Thread(() -> receiveMessages());
@@ -44,6 +50,7 @@ public class LiveServer {
     private static void receiveMessages() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.err.println("Server listening on port: " + serverSocket.getLocalPort());
+            initialized = true;
             while (!Thread.currentThread().isInterrupted()) {
                 Socket clientSocket = serverSocket.accept();
                 System.err.println("Client connected from port:  " + clientSocket.getPort());
@@ -51,6 +58,7 @@ public class LiveServer {
             }
         } catch (BindException ex) {
             System.err.println("Unable to bind TCP Port " + PORT);
+            initialized = false;
         } catch (IOException ex) {
             Logger.getLogger(LiveServer.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -34,6 +34,7 @@ public class DirectoryClient implements DirectoryService {
         try {
             registry = LocateRegistry.getRegistry(HOSTNAME, RMIServiceHost.RMI_PORT);
             stub = (DirectoryService) registry.lookup(DirectoryService.REMOTE_OBJECT_NAME);
+            initialized = true;
         } catch (RemoteException | NotBoundException ex) {
             Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
         }

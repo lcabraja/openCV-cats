@@ -5,7 +5,12 @@
  */
 package hr.algebra.utils;
 
+import hr.algebra.OpenCVCats;
+import hr.algebra.model.BulkImageViewHolder;
 import java.io.File;
+import java.io.FileFilter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javafx.stage.DirectoryChooser;
@@ -68,6 +73,13 @@ public final class FileUtils {
             return Optional.of(selectedDirectory);
         }
         return Optional.empty();
+    }
+
+    public static List<File> listDirectoryContents(File directory) {
+        FileFilter fileFilter
+                = (File dir) -> dir.isFile() && FileUtils.extensionOf(dir, FileUtils.Extensions.JPG);
+        File[] list = directory.listFiles(fileFilter);
+        return Arrays.asList(list);
     }
 
     public static boolean extensionOf(File file, Extensions... extension) {

@@ -8,11 +8,11 @@ package hr.algebra.controllers;
 import hr.algebra.OpenCVCats;
 import hr.algebra.caching.Cache;
 import hr.algebra.model.DetailedImageViewHolder;
-import hr.algebra.model.SerializableImage;
-import hr.algebra.serving.Client;
 import hr.algebra.utils.ColorUtils;
+import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -35,6 +34,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javax.imageio.ImageIO;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
@@ -51,15 +51,13 @@ import org.opencv.core.Size;
  */
 public class DetailedImageViewController implements Initializable {
 
+    private static final String TEMP_PREFIX = "hr.algebra.controllers";
+
     // -------------------------------------------------------------------------
     // ----------------------------------                                 fields
     // -------------------------------------------------------------------------
     @FXML
     private ImageView originalFrame;
-    @FXML
-    private ImageView modifiedFrameTop;
-    @FXML
-    private ImageView modifiedFrameBottom;
     @FXML
     private Label lbRectangles;
     @FXML
@@ -89,7 +87,7 @@ public class DetailedImageViewController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
         initFields();
-        test();
+        //test();
     }
 
     private void initFields() {
@@ -105,26 +103,41 @@ public class DetailedImageViewController implements Initializable {
     // ----------------------------------                              rendering
     // -------------------------------------------------------------------------
     private void analyzeImage() {
-        try {
-            setImage = holder.getImageFile();
-            bufferedImage = SwingFXUtils.fromFXImage(new Image(new FileInputStream(setImage)), null);
-            if (bufferedImage != null) {
-                Mat frame = ImageUtils.bufferedImageToMat(bufferedImage);
-                if (cache.contains(setImage, faceCascadePath)) {
-                    Optional<Rect[]> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
-                    if (potentialFaces.isPresent()) {
-                        facesArray = potentialFaces.get();
-                    }
-                } else {
-                    detectRects(frame);
-                    cache.setFaceRects(setImage, facesArray, faceCascadePath);
+        setImage = holder.getImageFile();
+        fixJpegAlphaChannel();
+        if (bufferedImage != null) {
+            Mat frame = ImageUtils.bufferedImageToMat(bufferedImage);
+            if (cache.contains(setImage, faceCascadePath)) {
+                Optional<Rect[]> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
+                if (potentialFaces.isPresent()) {
+                    facesArray = potentialFaces.get();
                 }
-                drawRectangles(frame);
-                imageToShow = ImageUtils.mat2Image(frame);
-                updateImageView(imageToShow);
-                displayStatistics();
+            } else {
+                detectRects(frame);
+                cache.setFaceRects(setImage, facesArray, faceCascadePath);
             }
-        } catch (FileNotFoundException ex) {
+            drawRectangles(frame);
+            imageToShow = ImageUtils.mat2Image(frame);
+            updateImageView(imageToShow);
+            displayStatistics();
+        }
+    }
+
+    // https://stackoverflow.com/questions/19548363/image-saved-in-javafx-as-jpg-is-pink-toned
+    private void fixJpegAlphaChannel() {
+        try {
+            bufferedImage = SwingFXUtils.fromFXImage(holder.getImage().getImage(), null);
+            BufferedImage imageRGB = new BufferedImage(
+                    bufferedImage.getWidth(),
+                    bufferedImage.getHeight(),
+                    BufferedImage.OPAQUE);
+            Graphics2D graphics = imageRGB.createGraphics();
+            graphics.drawImage(bufferedImage, 0, 0, null);
+            File tempFile = File.createTempFile(TEMP_PREFIX, "." + FileUtils.Extensions.JPG.toString());
+            ImageIO.write(imageRGB, "jpg", tempFile);
+            graphics.dispose();
+            bufferedImage = SwingFXUtils.fromFXImage(new Image(new FileInputStream(tempFile)), null);
+        } catch (IOException ex) {
             Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -216,34 +229,5 @@ public class DetailedImageViewController implements Initializable {
         faceCascadePath = classifierPath;
         faceCascade.load(classifierPath);
         analyzeImage();
-    }
-
-    private static final String FILE_NAME = "image.ser";
-
-    private void test() {
-        // Test of read/write serialized image to file
-        SerializableImage si = new SerializableImage(imageToShow);
-        try {
-            write(si, FILE_NAME);
-            SerializableImage image = read(FILE_NAME);
-            ImageUtils.onFXThread(modifiedFrameBottom.imageProperty(), image.getImage());
-
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        // Test of read/write serialized image over network
-        Client.requestImage(setImage, modifiedFrameTop.imageProperty());
-    }
-
-    private static void write(SerializableImage image, String fileName) throws IOException {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) { // decorator -> explain
-            oos.writeObject(image);
-        }
-    }
-
-    private static SerializableImage read(String fileName) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
-            return (SerializableImage) ois.readObject();
-        }
     }
 }

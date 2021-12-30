@@ -12,7 +12,7 @@
 
 <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="517.0" prefWidth="669.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.controllers.DetailedImageViewController">
    <children>
-      <ImageView fx:id="originalFrame" fitHeight="360.0" fitWidth="480.0" layoutX="14.0" layoutY="14.0" pickOnBounds="true" />
+      <ImageView fx:id="originalFrame" fitHeight="360.0" fitWidth="480.0" layoutX="14.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
       <GridPane layoutX="14.0" layoutY="374.0" prefHeight="131.0" prefWidth="720.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
         <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
