@@ -12,19 +12,20 @@ import hr.algebra.utils.ColorUtils;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
+import hr.algebra.opencv.CascadeClassifierEnum;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -34,6 +35,8 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javax.imageio.ImageIO;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -96,12 +99,31 @@ public class DetailedImageViewController implements Initializable {
         rbLbp.setToggleGroup(group);
         rbHaar.setSelected(true);
         faceCascade = new CascadeClassifier();
-        radioSelection("resources/haarcascades/haarcascade_frontalcatface.xml"); // selects the haar cascade as the default cascade
+        radioSelection(CascadeClassifierEnum.HAARCASCADE.toString());
     }
 
     // -------------------------------------------------------------------------
     // ----------------------------------                              rendering
     // -------------------------------------------------------------------------
+    // https://stackoverflow.com/questions/19548363/image-saved-in-javafx-as-jpg-is-pink-toned
+    private void fixJpegAlphaChannel() {
+        try {
+            bufferedImage = SwingFXUtils.fromFXImage(holder.getImage().getImage(), null);
+            BufferedImage imageRGB = new BufferedImage(
+                    bufferedImage.getWidth(),
+                    bufferedImage.getHeight(),
+                    BufferedImage.OPAQUE);
+            Graphics2D graphics = imageRGB.createGraphics();
+            graphics.drawImage(bufferedImage, 0, 0, null);
+            File tempFile = File.createTempFile(TEMP_PREFIX, "." + FileUtils.Extensions.JPG.toString());
+            ImageIO.write(imageRGB, "jpg", tempFile);
+            graphics.dispose();
+            bufferedImage = SwingFXUtils.fromFXImage(new Image(new FileInputStream(tempFile)), null);
+        } catch (IOException ex) {
+            Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     private void analyzeImage() {
         setImage = holder.getImageFile();
         fixJpegAlphaChannel();
@@ -120,25 +142,7 @@ public class DetailedImageViewController implements Initializable {
             imageToShow = ImageUtils.mat2Image(frame);
             updateImageView(imageToShow);
             displayStatistics();
-        }
-    }
-
-    // https://stackoverflow.com/questions/19548363/image-saved-in-javafx-as-jpg-is-pink-toned
-    private void fixJpegAlphaChannel() {
-        try {
-            bufferedImage = SwingFXUtils.fromFXImage(holder.getImage().getImage(), null);
-            BufferedImage imageRGB = new BufferedImage(
-                    bufferedImage.getWidth(),
-                    bufferedImage.getHeight(),
-                    BufferedImage.OPAQUE);
-            Graphics2D graphics = imageRGB.createGraphics();
-            graphics.drawImage(bufferedImage, 0, 0, null);
-            File tempFile = File.createTempFile(TEMP_PREFIX, "." + FileUtils.Extensions.JPG.toString());
-            ImageIO.write(imageRGB, "jpg", tempFile);
-            graphics.dispose();
-            bufferedImage = SwingFXUtils.fromFXImage(new Image(new FileInputStream(tempFile)), null);
-        } catch (IOException ex) {
-            Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
+            displayRectangles();
         }
     }
 
@@ -189,6 +193,14 @@ public class DetailedImageViewController implements Initializable {
         }
     }
 
+    private void displayRectangles() {
+        Text text = new Text("");
+        text.setFill(Color.web(ColorUtils.getDeterministicColorHex(lastRectColor)));
+
+        ObservableList<String> oblist
+                = FXCollections.observableList(new ArrayList<String>());
+    }
+
     private void updateImageView(Image imageToShow) {
         System.out.println("updateImageView @ " + getClass().toString());
         ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
@@ -212,7 +224,7 @@ public class DetailedImageViewController implements Initializable {
         if (rbLbp.isSelected()) {
             rbLbp.setSelected(false);
         }
-        radioSelection("resources/haarcascades/haarcascade_frontalcatface.xml");
+        radioSelection(CascadeClassifierEnum.HAARCASCADE.toString());
     }
 
     @FXML
@@ -221,7 +233,7 @@ public class DetailedImageViewController implements Initializable {
         if (rbHaar.isSelected()) {
             rbHaar.setSelected(false);
         }
-        radioSelection("resources/lbpcascades/lbpcascade_frontalcatface.xml");
+        radioSelection(CascadeClassifierEnum.LBPCASCADE.toString());
     }
 
     private void radioSelection(String classifierPath) {
