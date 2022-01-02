@@ -7,7 +7,6 @@ package hr.algebra.rmi;
 
 import hr.algebra.model.CachedFile;
 import java.awt.Rectangle;
-import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
