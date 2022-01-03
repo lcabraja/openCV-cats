@@ -12,7 +12,7 @@ import java.util.Objects;
  *
  * @author lcabraja
  */
-public class CachedFile implements Serializable {
+public class CachedResult implements Serializable {
     private String FilePath;
     private String ClassifierPath;
 
@@ -49,7 +49,7 @@ public class CachedFile implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final CachedFile other = (CachedFile) obj;
+        final CachedResult other = (CachedResult) obj;
         if (!Objects.equals(this.FilePath, other.FilePath)) {
             return false;
         }
@@ -58,6 +58,9 @@ public class CachedFile implements Serializable {
         }
         return true;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return "CachedResult{" + "FilePath=" + FilePath + ", ClassifierPath=" + ClassifierPath + '}';
+    }
 }

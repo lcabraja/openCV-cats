@@ -5,7 +5,7 @@
  */
 package hr.algebra.caching;
 
-import hr.algebra.model.CachedFile;
+import hr.algebra.model.CachedResult;
 import hr.algebra.utils.OCVUtils;
 import hr.algebra.utils.SerializationUtils;
 import java.awt.Rectangle;
@@ -25,13 +25,13 @@ public class FileCache implements Cache {
     @Override
     public boolean contains(File imageFile, String classifierPath) {
         System.out.println("contains @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cf = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
             }
         };
-        Optional<Map<CachedFile, Rect[]>> serializedFile
+        Optional<Map<CachedResult, Rect[]>> serializedFile
                 = getSerializedFile();
         return serializedFile.isPresent();
     }
@@ -39,13 +39,13 @@ public class FileCache implements Cache {
     @Override
     public Optional<Rect[]> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cf = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
             }
         };
-        Optional<Map<CachedFile, Rect[]>> serializedFile
+        Optional<Map<CachedResult, Rect[]>> serializedFile
                 = getSerializedFile();
         if (serializedFile.isPresent()
                 && serializedFile.get().containsKey(cf)) {
@@ -54,13 +54,13 @@ public class FileCache implements Cache {
         return Optional.empty();
     }
 
-    private Optional<Map<CachedFile, Rect[]>> getSerializedFile() {
+    private Optional<Map<CachedResult, Rect[]>> getSerializedFile() {
         System.out.println("getSerializedFile @ " + getClass().toString());
-        Optional<Map<CachedFile, Rectangle[]>> serializedFile
-                = SerializationUtils.<Map<CachedFile, Rectangle[]>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
+        Optional<Map<CachedResult, Rectangle[]>> serializedFile
+                = SerializationUtils.<Map<CachedResult, Rectangle[]>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
         if (serializedFile.isPresent()) {
-            Map<CachedFile, Rect[]> convertMap = new HashMap<>();
-            for (Map.Entry<CachedFile, Rectangle[]> entry : serializedFile.get().entrySet()) {
+            Map<CachedResult, Rect[]> convertMap = new HashMap<>();
+            for (Map.Entry<CachedResult, Rectangle[]> entry : serializedFile.get().entrySet()) {
                 convertMap.put(entry.getKey(), OCVUtils.rectangleArrayToRectArray(entry.getValue()));
             }
             return Optional.of(convertMap);
@@ -71,14 +71,14 @@ public class FileCache implements Cache {
     @Override
     public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
         System.out.println("setFaceRects @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cf = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
             }
         };
 
-        Map<CachedFile, Rect[]> previousSerialization;
+        Map<CachedResult, Rect[]> previousSerialization;
         if (contains(imageFile, classifierPath)) {
             previousSerialization = getSerializedFile().get();
         } else {
@@ -86,8 +86,8 @@ public class FileCache implements Cache {
         }
         previousSerialization.put(cf, facesArray);
 
-        Map<CachedFile, Rectangle[]> convertMap = new HashMap<>();
-        for (Map.Entry<CachedFile, Rect[]> entry : previousSerialization.entrySet()) {
+        Map<CachedResult, Rectangle[]> convertMap = new HashMap<>();
+        for (Map.Entry<CachedResult, Rect[]> entry : previousSerialization.entrySet()) {
             convertMap.put(entry.getKey(), OCVUtils.rectArrayToRectangleArray(entry.getValue()));
         }
         SerializationUtils.updateSerializedItem((Serializable) convertMap, SerializationUtils.RECT_SERIALIZATION);

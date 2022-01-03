@@ -5,7 +5,7 @@
  */
 package hr.algebra.caching;
 
-import hr.algebra.model.CachedFile;
+import hr.algebra.model.CachedResult;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +19,12 @@ import org.opencv.core.Rect;
 public class MemCache implements Cache {
 
 //    private Map<CachedFile, Rect[]>> 
-    private final Map<CachedFile, Rect[]> faces = new HashMap<>();
+    private final Map<CachedResult, Rect[]> faces = new HashMap<>();
 
     @Override
     public boolean contains(File imageFile, String classifierPath) {
         System.out.println("contains @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cf = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
@@ -39,7 +39,7 @@ public class MemCache implements Cache {
     @Override
     public Optional<Rect[]> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cf = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
@@ -54,7 +54,7 @@ public class MemCache implements Cache {
     @Override
     public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
         System.out.println("setFaceRects @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cf = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);

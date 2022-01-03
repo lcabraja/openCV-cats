@@ -16,14 +16,14 @@ import java.util.List;
 public class Solution implements Serializable {
 
     private List<Rectangle> correctangles;
-    private CachedFile correctSolution;
+    private CachedResult correctSolution;
 
     public Solution() {
         this.correctangles = null;
         this.correctSolution = null;
     }
 
-    public Solution(List<Rectangle> correctangles, CachedFile correctSolution) {
+    public Solution(List<Rectangle> correctangles, CachedResult correctSolution) {
         this.correctangles = correctangles;
         this.correctSolution = correctSolution;
     }
@@ -36,11 +36,11 @@ public class Solution implements Serializable {
         this.correctangles = correctangles;
     }
 
-    public CachedFile getCorrectSolution() {
+    public CachedResult getCorrectSolution() {
         return correctSolution;
     }
 
-    public void setCorrectSolution(CachedFile correctSolution) {
+    public void setCorrectSolution(CachedResult correctSolution) {
         this.correctSolution = correctSolution;
     }
 
