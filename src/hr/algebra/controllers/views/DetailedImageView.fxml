@@ -60,7 +60,7 @@
             </Button>
          </children>
       </GridPane>
-      <ListView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
+      <ListView fx:id="lvRectangles" onMouseClicked="#lvRectanglesClicked" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" />
    </children>
    <columnConstraints>
       <ColumnConstraints minWidth="10.0" prefWidth="480.0" />

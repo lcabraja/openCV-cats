@@ -20,10 +20,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -31,10 +33,12 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javax.imageio.ImageIO;
@@ -79,9 +83,12 @@ public class DetailedImageViewController implements Initializable {
     private BufferedImage bufferedImage;
     private File setImage;
     private Image imageToShow;
+    private Mat frame;
 
     Rect[] facesArray;
     private String lastRectColor = null;
+    @FXML
+    private ListView<String> lvRectangles;
 
     // -------------------------------------------------------------------------
     // ----------------------------------                                  inits
@@ -128,7 +135,7 @@ public class DetailedImageViewController implements Initializable {
         setImage = holder.getImageFile();
         fixJpegAlphaChannel();
         if (bufferedImage != null) {
-            Mat frame = ImageUtils.bufferedImageToMat(bufferedImage);
+            frame = ImageUtils.bufferedImageToMat(bufferedImage);
             if (cache.contains(setImage, faceCascadePath)) {
                 Optional<Rect[]> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
                 if (potentialFaces.isPresent()) {
@@ -138,11 +145,10 @@ public class DetailedImageViewController implements Initializable {
                 detectRects(frame);
                 cache.setFaceRects(setImage, facesArray, faceCascadePath);
             }
+            updateRectangleList();
             drawRectangles(frame);
-            imageToShow = ImageUtils.mat2Image(frame);
-            updateImageView(imageToShow);
+            updateImageView(ImageUtils.mat2Image(frame));
             displayStatistics();
-            displayRectangles();
         }
     }
 
@@ -179,6 +185,17 @@ public class DetailedImageViewController implements Initializable {
         }
     }
 
+    private void updateRectangleList() {
+        List<String> faceList = new ArrayList<>();
+        Rect temp;
+        for (int i = 0; i < facesArray.length; i++) {
+            temp = facesArray[i];
+            faceList.add(i + ". " + temp.width + "x" + temp.height);
+        }
+        ObservableList<String> oblist = FXCollections.observableList(faceList);
+        lvRectangles.setItems(oblist);
+    }
+
     private void displayStatistics() {
         switch (facesArray.length) {
             case 0:
@@ -193,12 +210,9 @@ public class DetailedImageViewController implements Initializable {
         }
     }
 
-    private void displayRectangles() {
+    private void displayRectangles(boolean colored) {
         Text text = new Text("");
         text.setFill(Color.web(ColorUtils.getDeterministicColorHex(lastRectColor)));
-
-        ObservableList<String> oblist
-                = FXCollections.observableList(new ArrayList<String>());
     }
 
     private void updateImageView(Image imageToShow) {
@@ -209,6 +223,11 @@ public class DetailedImageViewController implements Initializable {
     // -------------------------------------------------------------------------
     // ----------------------------------                                UI code
     // -------------------------------------------------------------------------
+    @FXML
+    private void lvRectanglesClicked(MouseEvent event) {
+
+    }
+
     @FXML
     private void goBack() throws IOException {
         System.out.println("goBack @ " + getClass().toString());
