@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -84,8 +83,9 @@ public class DetailedImageViewController implements Initializable {
 
     private Rect[] facesArray;
     private List<Boolean> correctangles;
-
+    private int selectangle = 0;
     private String lastRectColor = null;
+
     @FXML
     private ListView<String> lvRectangles;
 
@@ -231,14 +231,20 @@ public class DetailedImageViewController implements Initializable {
     // -------------------------------------------------------------------------
     @FXML
     private void lvRectanglesClicked(MouseEvent event) {
-        int index = lvRectangles.getSelectionModel().getSelectedIndex();
-        try {
-            correctangles.set(index, !correctangles.get(index));
-            drawRectangles(frame);
-            updateImageView(ImageUtils.mat2Image(frame));
-            displayStatistics();
-        } catch (IndexOutOfBoundsException ex) {
-            System.err.println("Missing face index: " + index);
+        this.selectangle = lvRectangles.getSelectionModel().getSelectedIndex();
+    }
+
+    @FXML
+    private void toggleRectangle() {
+        if (selectangle >= 0 && selectangle < facesArray.length) {
+            try {
+                correctangles.set(this.selectangle, !correctangles.get(this.selectangle));
+                drawRectangles(frame);
+                updateImageView(ImageUtils.mat2Image(frame));
+                displayStatistics();
+            } catch (IndexOutOfBoundsException ex) {
+                System.err.println("Missing face index: " + this.selectangle);
+            }
         }
     }
 
