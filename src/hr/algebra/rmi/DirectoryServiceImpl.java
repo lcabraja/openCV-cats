@@ -5,9 +5,13 @@
  */
 package hr.algebra.rmi;
 
+import hr.algebra.OpenCVCats;
+import hr.algebra.caching.Cache;
+import hr.algebra.model.CachedResult;
 import hr.algebra.model.Solution;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -51,7 +55,15 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public Solution getImageData() throws RemoteException {
-        return new Solution();
+    public Solution getSolution(CachedResult cr) throws RemoteException {
+        Optional<Solution> solution = OpenCVCats.cache.getSolution(cr);
+        System.out.println(solution);
+        return solution.isPresent() ? solution.get() : null;
+    }
+
+    @Override
+    public void setSolution(Solution solution) {
+        OpenCVCats.cache.setSolution(solution);
+        System.out.println(solution);
     }
 }

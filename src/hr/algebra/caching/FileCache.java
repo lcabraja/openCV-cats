@@ -6,6 +6,8 @@
 package hr.algebra.caching;
 
 import hr.algebra.model.CachedResult;
+import hr.algebra.model.Solution;
+import hr.algebra.utils.CollectionUtils;
 import hr.algebra.utils.SerializationUtils;
 import java.io.File;
 import java.io.Serializable;
@@ -35,6 +37,11 @@ public class FileCache implements Cache {
     }
 
     @Override
+    public boolean containsSolution(File imageFile, String classifierPath) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
     public Optional<CachedResult> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
         CachedResult cf = new CachedResult() {
@@ -48,7 +55,7 @@ public class FileCache implements Cache {
 
             Set<CachedResult> results = deserializedCache.get();
             if (results.contains(cf)) {
-                return Optional.of(results.stream().filter(cf::equals).findAny().orElse(null));
+                return Optional.of(CollectionUtils.getValueFromSet(results, cf));
             }
         }
         return Optional.empty();
@@ -81,4 +88,13 @@ public class FileCache implements Cache {
         SerializationUtils.updateSerializedItem((Serializable) previousSerialization, SerializationUtils.RECT_SERIALIZATION);
     }
 
+    @Override
+    public void setSolution(Solution solution) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Optional<Solution> getSolution(CachedResult cr) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

@@ -7,6 +7,7 @@ package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
 import hr.algebra.caching.Cache;
+import hr.algebra.model.CachedResult;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.utils.ColorUtils;
 import hr.algebra.utils.FileUtils;
@@ -136,11 +137,9 @@ public class DetailedImageViewController implements Initializable {
         fixJpegAlphaChannel();
         if (bufferedImage != null) {
             frame = ImageUtils.bufferedImageToMat(bufferedImage);
-            if (cache.contains(setImage, faceCascadePath)) {
-                Optional<Rect[]> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
-                if (potentialFaces.isPresent()) {
-                    facesArray = potentialFaces.get();
-                }
+            Optional<CachedResult> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
+            if (potentialFaces.isPresent()) {
+                facesArray = potentialFaces.get().getRects();
             } else {
                 detectRects(frame);
                 cache.setFaceRects(setImage, facesArray, faceCascadePath);
@@ -232,6 +231,11 @@ public class DetailedImageViewController implements Initializable {
     @FXML
     private void lvRectanglesClicked(MouseEvent event) {
         this.selectangle = lvRectangles.getSelectionModel().getSelectedIndex();
+    }
+
+    @FXML
+    private void saveSolution(MouseEvent event) {
+        
     }
 
     @FXML

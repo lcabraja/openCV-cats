@@ -6,6 +6,7 @@
 package hr.algebra.rmi;
 
 import hr.algebra.OpenCVCats;
+import hr.algebra.model.CachedResult;
 import hr.algebra.model.Solution;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -51,18 +52,41 @@ public class DirectoryClient implements DirectoryService {
     }
 
     @Override
-    public List<String> getFiles() throws RemoteException {
+    public List<String> getFiles() {
         if (!initialized) {
             return null;
+        }
+        try {
+            stub.getFiles();
+        } catch (RemoteException ex) {
+            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
 
     @Override
-    public Solution getImageData() throws RemoteException {
+    public Solution getSolution(CachedResult cr) {
         if (!initialized) {
             return null;
         }
+        try {
+            return stub.getSolution(cr);
+        } catch (RemoteException ex) {
+            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return null;
+    }
+
+    @Override
+    public void setSolution(Solution solution) {
+        if (!initialized) {
+            return;
+        }
+        try {
+            stub.setSolution(solution);
+        } catch (RemoteException ex) {
+            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 }
