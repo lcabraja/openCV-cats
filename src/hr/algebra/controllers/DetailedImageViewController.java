@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -38,8 +39,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javax.imageio.ImageIO;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -81,10 +80,11 @@ public class DetailedImageViewController implements Initializable {
     private String faceCascadePath;
     private BufferedImage bufferedImage;
     private File setImage;
-    private Image imageToShow;
     private Mat frame;
 
-    Rect[] facesArray;
+    private Rect[] facesArray;
+    private List<Boolean> correctangles;
+
     private String lastRectColor = null;
     @FXML
     private ListView<String> lvRectangles;
@@ -106,6 +106,7 @@ public class DetailedImageViewController implements Initializable {
         rbHaar.setSelected(true);
         faceCascade = new CascadeClassifier();
         radioSelection(CascadeClassifierEnum.HAARCASCADE.toString());
+        System.out.println("correctangles" + correctangles.size());
     }
 
     // -------------------------------------------------------------------------
@@ -144,7 +145,7 @@ public class DetailedImageViewController implements Initializable {
                 detectRects(frame);
                 cache.setFaceRects(setImage, facesArray, faceCascadePath);
             }
-            updateRectangleList();
+            updateRectangleLists();
             drawRectangles(frame);
             updateImageView(ImageUtils.mat2Image(frame));
             displayStatistics();
@@ -174,29 +175,40 @@ public class DetailedImageViewController implements Initializable {
     }
 
     private void drawRectangles(Mat frame) {
+        drawRectanglesColored(frame, correctangles);
+    }
+
+    private void drawRectanglesColored(Mat frame, List<Boolean> coloredRects) {
         // draw rectangles
         Scalar color;
         lastRectColor = ColorUtils.getDeterministicColorHex();
-        for (Rect face : facesArray) {
-            color = ColorUtils.hexToScalar(lastRectColor);
+        for (int i = 0; i < facesArray.length; i++) {
+            try {
+                color = (coloredRects != null && coloredRects.get(i)) ? ColorUtils.hexToScalar(lastRectColor) : ColorUtils.GRAY.getScalarValue();
+            } catch (IndexOutOfBoundsException ex) {
+                color = ColorUtils.hexToScalar(lastRectColor);
+            }
             lastRectColor = ColorUtils.getDeterministicColorHex(lastRectColor);
-            Imgproc.rectangle(frame, face.tl(), face.br(), color, 3);
+            Imgproc.rectangle(frame, facesArray[i].tl(), facesArray[i].br(), color, 3);
         }
     }
 
-    private void updateRectangleList() {
+    private void updateRectangleLists() {
+        this.correctangles = new ArrayList<>();
         List<String> faceList = new ArrayList<>();
         Rect temp;
         for (int i = 0; i < facesArray.length; i++) {
             temp = facesArray[i];
             faceList.add(i + ". " + temp.width + "x" + temp.height);
+            correctangles.add(Boolean.TRUE);
         }
         ObservableList<String> oblist = FXCollections.observableList(faceList);
         lvRectangles.setItems(oblist);
     }
 
     private void displayStatistics() {
-        switch (facesArray.length) {
+        int count = (int) correctangles.stream().filter(value -> value).count();
+        switch (count) {
             case 0:
                 lbRectangles.setText("Detected no cats");
                 break;
@@ -204,14 +216,9 @@ public class DetailedImageViewController implements Initializable {
                 lbRectangles.setText("Detected 1 cat");
                 break;
             default:
-                lbRectangles.setText(String.format("Detected %d cats", facesArray.length));
+                lbRectangles.setText(String.format("Detected %d cats", count));
                 break;
         }
-    }
-
-    private void displayRectangles(boolean colored) {
-        Text text = new Text("");
-        text.setFill(Color.web(ColorUtils.getDeterministicColorHex(lastRectColor)));
     }
 
     private void updateImageView(Image imageToShow) {
@@ -224,7 +231,15 @@ public class DetailedImageViewController implements Initializable {
     // -------------------------------------------------------------------------
     @FXML
     private void lvRectanglesClicked(MouseEvent event) {
-
+        int index = lvRectangles.getSelectionModel().getSelectedIndex();
+        try {
+            correctangles.set(index, !correctangles.get(index));
+            drawRectangles(frame);
+            updateImageView(ImageUtils.mat2Image(frame));
+            displayStatistics();
+        } catch (IndexOutOfBoundsException ex) {
+            System.err.println("Missing face index: " + index);
+        }
     }
 
     @FXML
