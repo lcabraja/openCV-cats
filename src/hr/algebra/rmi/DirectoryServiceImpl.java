@@ -7,7 +7,6 @@ package hr.algebra.rmi;
 
 import hr.algebra.model.CachedFile;
 import java.awt.Rectangle;
-import java.io.File;
 import java.rmi.RemoteException;
 import java.util.List;
 import javafx.util.Pair;

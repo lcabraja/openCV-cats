@@ -5,8 +5,6 @@
  */
 package hr.algebra.utils;
 
-import hr.algebra.OpenCVCats;
-import hr.algebra.model.BulkImageViewHolder;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;

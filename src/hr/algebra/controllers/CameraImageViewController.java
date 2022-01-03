@@ -11,7 +11,6 @@ import hr.algebra.serving.LiveServer;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
 import hr.algebra.opencv.CascadeClassifierEnum;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;

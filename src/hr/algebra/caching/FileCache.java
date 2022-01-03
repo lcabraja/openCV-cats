@@ -14,7 +14,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 import org.opencv.core.Rect;
 
 /**
