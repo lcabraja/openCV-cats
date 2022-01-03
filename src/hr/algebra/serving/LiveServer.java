@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 public class LiveServer {
 
     public static final int PORT = 23456;
-    public static final String HOST = "localhost";
     public static SerializableImage serializableImage = null;
 
     private static Thread serverThread = null;

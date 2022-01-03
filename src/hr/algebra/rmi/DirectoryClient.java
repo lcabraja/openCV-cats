@@ -5,6 +5,7 @@
  */
 package hr.algebra.rmi;
 
+import hr.algebra.OpenCVCats;
 import hr.algebra.model.CachedFile;
 import java.awt.Rectangle;
 import java.rmi.NotBoundException;
@@ -22,16 +23,14 @@ import javafx.util.Pair;
  */
 public class DirectoryClient implements DirectoryService {
 
-    public static final String HOSTNAME = "localhost";
-
     private Registry registry;
     private DirectoryService stub;
     private boolean initialized = false;
 
     public DirectoryClient() {
-        System.out.println("Locating registry on " + HOSTNAME + ":" + RMIServiceHost.RMI_PORT);
+        System.out.println("Locating registry on " + OpenCVCats.HOST + ":" + RMIServiceHost.RMI_PORT);
         try {
-            registry = LocateRegistry.getRegistry(HOSTNAME, RMIServiceHost.RMI_PORT);
+            registry = LocateRegistry.getRegistry(OpenCVCats.HOST, RMIServiceHost.RMI_PORT);
             stub = (DirectoryService) registry.lookup(DirectoryService.REMOTE_OBJECT_NAME);
             initialized = true;
         } catch (RemoteException | NotBoundException ex) {

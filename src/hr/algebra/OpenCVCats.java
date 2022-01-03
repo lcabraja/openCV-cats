@@ -25,7 +25,8 @@ import org.opencv.core.Core;
  */
 public class OpenCVCats extends Application {
 
-    public static Cache cache = new MemCache();
+    public static final String HOST = "localhost";
+    public static final Cache cache = new MemCache();
     private static Stage mainStage;
 
     public static Stage getMainStage() {

@@ -25,7 +25,6 @@ import javafx.scene.image.Image;
 public class Server {
 
     public static final int PORT = 12345;
-    public static final String HOST = "localhost";
 
     private static Thread serverThread = null;
 

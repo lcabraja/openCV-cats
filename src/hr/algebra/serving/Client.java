@@ -5,6 +5,7 @@
  */
 package hr.algebra.serving;
 
+import hr.algebra.OpenCVCats;
 import hr.algebra.model.SerializableImage;
 import hr.algebra.utils.ImageUtils;
 import java.io.File;
@@ -33,7 +34,7 @@ public class Client {
     }
 
     private void sendImageThread(File requestedFile, ObjectProperty<Image> canvas) {
-        try (Socket clientSocket = new Socket(Server.HOST, Server.PORT)) {
+        try (Socket clientSocket = new Socket(OpenCVCats.HOST, Server.PORT)) {
             System.err.println("Client connecting onto: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
             send(clientSocket, requestedFile, canvas);
         } catch (IOException ex) {
@@ -60,7 +61,7 @@ public class Client {
     }
 
     private void sendImageThread(File requestedFile, Consumer consumer) {
-        try (Socket clientSocket = new Socket(Server.HOST, Server.PORT)) {
+        try (Socket clientSocket = new Socket(OpenCVCats.HOST, Server.PORT)) {
             System.err.println("Client connecting onto: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
             send(clientSocket, requestedFile, consumer);
         } catch (IOException ex) {
@@ -82,7 +83,7 @@ public class Client {
     // ---------------------------------------------------------- Blocking -----
 
     public SerializableImage requestImageSync(File requestedFile) {
-        try (Socket clientSocket = new Socket(Server.HOST, Server.PORT)) {
+        try (Socket clientSocket = new Socket(OpenCVCats.HOST, Server.PORT)) {
             System.err.println("Client connecting onto: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
             return send(clientSocket, requestedFile);
         } catch (IOException ex) {
