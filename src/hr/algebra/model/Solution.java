@@ -43,4 +43,9 @@ public class Solution implements Serializable {
     public void setCorrectSolution(CachedFile correctSolution) {
         this.correctSolution = correctSolution;
     }
+
+    @Override
+    public String toString() {
+        return "Solution{" + "correctangles=" + correctangles + ", correctSolution=" + correctSolution + '}';
+    }
 }
