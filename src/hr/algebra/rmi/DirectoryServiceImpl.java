@@ -6,6 +6,7 @@
 package hr.algebra.rmi;
 
 import hr.algebra.model.CachedResult;
+import hr.algebra.model.Solution;
 import java.awt.Rectangle;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -53,14 +54,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public Pair<CachedResult, Rectangle[]> getImageData() throws RemoteException {
-        System.out.println("getImageData @ " + getClass().toString());
-        CachedResult cf = new CachedResult();
-        cf.setClassifierPath(REMOTE_OBJECT_NAME);
-        cf.setFilePath("filepath");
-        return new Pair<>(cf, new Rectangle[]{
-            new Rectangle(1, 2, 3, 4),
-            new Rectangle(5, 6, 7, 8)
-        });
+    public Solution getImageData() throws RemoteException {
+        return new Solution();
     }
 }

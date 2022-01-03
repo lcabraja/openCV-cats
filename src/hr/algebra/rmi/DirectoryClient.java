@@ -6,8 +6,7 @@
 package hr.algebra.rmi;
 
 import hr.algebra.OpenCVCats;
-import hr.algebra.model.CachedResult;
-import java.awt.Rectangle;
+import hr.algebra.model.Solution;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -15,7 +14,6 @@ import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.util.Pair;
 
 /**
  *
@@ -61,7 +59,7 @@ public class DirectoryClient implements DirectoryService {
     }
 
     @Override
-    public Pair<CachedResult, Rectangle[]> getImageData() throws RemoteException {
+    public Solution getImageData() throws RemoteException {
         if (!initialized) {
             return null;
         }

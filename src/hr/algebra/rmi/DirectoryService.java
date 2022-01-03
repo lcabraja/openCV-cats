@@ -6,6 +6,7 @@
 package hr.algebra.rmi;
 
 import hr.algebra.model.CachedResult;
+import hr.algebra.model.Solution;
 import java.awt.Rectangle;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -24,5 +25,5 @@ public interface DirectoryService extends Remote {
 
     public List<String> getFiles() throws RemoteException;
 
-    public Pair<CachedResult, Rectangle[]> getImageData() throws RemoteException;
+    public Solution getImageData() throws RemoteException;
 }
