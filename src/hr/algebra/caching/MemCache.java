@@ -7,10 +7,8 @@ package hr.algebra.caching;
 
 import hr.algebra.model.CachedResult;
 import java.io.File;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.opencv.core.Rect;
 

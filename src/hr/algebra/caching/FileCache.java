@@ -6,16 +6,10 @@
 package hr.algebra.caching;
 
 import hr.algebra.model.CachedResult;
-import hr.algebra.utils.OCVUtils;
 import hr.algebra.utils.SerializationUtils;
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.opencv.core.Rect;

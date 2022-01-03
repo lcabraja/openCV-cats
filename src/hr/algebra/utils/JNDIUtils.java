@@ -5,14 +5,11 @@
  */
 package hr.algebra.utils;
 
-import com.sun.jndi.fscontext.RefFSContext;
 import com.sun.jndi.fscontext.RefFSContextFactory;
 import hr.algebra.jndi.InitialDirContextCloseable;
 import hr.algebra.utils.FileUtils.Extensions;
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Level;

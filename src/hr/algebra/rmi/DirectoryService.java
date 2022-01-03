@@ -5,13 +5,10 @@
  */
 package hr.algebra.rmi;
 
-import hr.algebra.model.CachedResult;
 import hr.algebra.model.Solution;
-import java.awt.Rectangle;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
-import javafx.util.Pair;
 
 /**
  *
