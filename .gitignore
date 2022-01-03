@@ -3,8 +3,6 @@
 /out
 openCV-cats.iml
 documentation.html
-ui.ser
 /.idea
 *.log
-nbproject/private/private.xml
-image.ser
+*.ser
