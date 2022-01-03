@@ -12,8 +12,12 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.opencv.core.Rect;
 
 /**
@@ -31,13 +35,13 @@ public class FileCache implements Cache {
                 setClassifierPath(classifierPath);
             }
         };
-        Optional<Map<CachedResult, Rect[]>> serializedFile
+        Optional<Set<CachedResult>> serializedFile
                 = getSerializedFile();
-        return serializedFile.isPresent();
+        return serializedFile.isPresent() && serializedFile.get().contains(cf);
     }
 
     @Override
-    public Optional<Rect[]> getFaceRects(File imageFile, String classifierPath) {
+    public Optional<CachedResult> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
         CachedResult cf = new CachedResult() {
             {
@@ -45,27 +49,22 @@ public class FileCache implements Cache {
                 setClassifierPath(classifierPath);
             }
         };
-        Optional<Map<CachedResult, Rect[]>> serializedFile
-                = getSerializedFile();
-        if (serializedFile.isPresent()
-                && serializedFile.get().containsKey(cf)) {
-            return Optional.of(serializedFile.get().get(cf));
+        Optional<Set<CachedResult>> deserializedCache = getSerializedFile();
+        if (deserializedCache.isPresent()) {
+
+            Set<CachedResult> results = deserializedCache.get();
+            if (results.contains(cf)) {
+                return Optional.of(results.stream().filter(cf::equals).findAny().orElse(null));
+            }
         }
         return Optional.empty();
     }
 
-    private Optional<Map<CachedResult, Rect[]>> getSerializedFile() {
+    private Optional<Set<CachedResult>> getSerializedFile() {
         System.out.println("getSerializedFile @ " + getClass().toString());
-        Optional<Map<CachedResult, Rectangle[]>> serializedFile
-                = SerializationUtils.<Map<CachedResult, Rectangle[]>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
-        if (serializedFile.isPresent()) {
-            Map<CachedResult, Rect[]> convertMap = new HashMap<>();
-            for (Map.Entry<CachedResult, Rectangle[]> entry : serializedFile.get().entrySet()) {
-                convertMap.put(entry.getKey(), OCVUtils.rectangleArrayToRectArray(entry.getValue()));
-            }
-            return Optional.of(convertMap);
-        }
-        return Optional.empty();
+        Optional<Set<CachedResult>> serializedFile
+                = SerializationUtils.<Set<CachedResult>>fetchSerializaedItem(SerializationUtils.RECT_SERIALIZATION);
+        return serializedFile;
     }
 
     @Override
@@ -78,19 +77,14 @@ public class FileCache implements Cache {
             }
         };
 
-        Map<CachedResult, Rect[]> previousSerialization;
+        Set<CachedResult> previousSerialization;
         if (contains(imageFile, classifierPath)) {
             previousSerialization = getSerializedFile().get();
         } else {
-            previousSerialization = new HashMap<>();
+            previousSerialization = new HashSet<>();
         }
-        previousSerialization.put(cf, facesArray);
-
-        Map<CachedResult, Rectangle[]> convertMap = new HashMap<>();
-        for (Map.Entry<CachedResult, Rect[]> entry : previousSerialization.entrySet()) {
-            convertMap.put(entry.getKey(), OCVUtils.rectArrayToRectangleArray(entry.getValue()));
-        }
-        SerializationUtils.updateSerializedItem((Serializable) convertMap, SerializationUtils.RECT_SERIALIZATION);
+        previousSerialization.add(cf);
+        SerializationUtils.updateSerializedItem((Serializable) previousSerialization, SerializationUtils.RECT_SERIALIZATION);
     }
 
 }

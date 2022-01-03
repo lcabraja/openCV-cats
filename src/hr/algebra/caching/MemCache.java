@@ -8,6 +8,8 @@ package hr.algebra.caching;
 import hr.algebra.model.CachedResult;
 import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.opencv.core.Rect;
@@ -18,8 +20,7 @@ import org.opencv.core.Rect;
  */
 public class MemCache implements Cache {
 
-//    private Map<CachedFile, Rect[]>> 
-    private final Map<CachedResult, Rect[]> faces = new HashMap<>();
+    private final List<CachedResult> faces = new LinkedList<>();
 
     @Override
     public boolean contains(File imageFile, String classifierPath) {
@@ -30,14 +31,14 @@ public class MemCache implements Cache {
                 setClassifierPath(classifierPath);
             }
         };
-        if (faces.containsKey(cf)) {
-            return faces.containsKey(cf);
+        if (faces.contains(cf)) {
+            return faces.contains(cf);
         }
         return false;
     }
 
     @Override
-    public Optional<Rect[]> getFaceRects(File imageFile, String classifierPath) {
+    public Optional<CachedResult> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
         CachedResult cf = new CachedResult() {
             {
@@ -45,8 +46,8 @@ public class MemCache implements Cache {
                 setClassifierPath(classifierPath);
             }
         };
-        if (faces.containsKey(cf)) {
-            return Optional.of(faces.get(cf));
+        if (faces.contains(cf)) {
+            return Optional.of(faces.get(faces.indexOf(cf)));
         }
         return Optional.empty();
     }
@@ -58,8 +59,9 @@ public class MemCache implements Cache {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
+                setRects(facesArray);
             }
         };
-        faces.put(cf, facesArray);
+        faces.add(cf);
     }
 }

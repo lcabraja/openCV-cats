@@ -5,36 +5,59 @@
  */
 package hr.algebra.model;
 
+import hr.algebra.utils.OCVUtils;
+import java.awt.Rectangle;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import org.opencv.core.Rect;
 
 /**
  *
  * @author lcabraja
  */
 public class CachedResult implements Serializable {
-    private String FilePath;
-    private String ClassifierPath;
+
+    private String filePath;
+    private String classifierPath;
+    private List<Rectangle> rectangles;
 
     public String getFilePath() {
-        return FilePath;
+        return filePath;
     }
 
     public void setFilePath(String FilePath) {
-        this.FilePath = FilePath;
+        this.filePath = FilePath;
     }
 
     public String getClassifierPath() {
-        return ClassifierPath;
+        return classifierPath;
     }
 
     public void setClassifierPath(String ClassifierPath) {
-        this.ClassifierPath = ClassifierPath;
+        this.classifierPath = ClassifierPath;
+    }
+
+    public List<Rectangle> getRectangles() {
+        return rectangles;
+    }
+
+    public void setRectangles(List<Rectangle> rectangles) {
+        this.rectangles = rectangles;
+    }
+
+    public Rect[] getRects() {
+        return (Rect[]) OCVUtils.rectangleListToRectList(rectangles).toArray();
+    }
+
+    public void setRects(Rect[] rectangles) {
+        this.rectangles = Arrays.asList(OCVUtils.rectArrayToRectangleArray(rectangles));
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
+        int hash = 5;
         return hash;
     }
 
@@ -50,10 +73,10 @@ public class CachedResult implements Serializable {
             return false;
         }
         final CachedResult other = (CachedResult) obj;
-        if (!Objects.equals(this.FilePath, other.FilePath)) {
+        if (!Objects.equals(this.filePath, other.filePath)) {
             return false;
         }
-        if (!Objects.equals(this.ClassifierPath, other.ClassifierPath)) {
+        if (!Objects.equals(this.classifierPath, other.classifierPath)) {
             return false;
         }
         return true;
@@ -61,6 +84,6 @@ public class CachedResult implements Serializable {
 
     @Override
     public String toString() {
-        return "CachedResult{" + "FilePath=" + FilePath + ", ClassifierPath=" + ClassifierPath + '}';
+        return "CachedResult{" + "filePath=" + filePath + ", classifierPath=" + classifierPath + ", rectangles=" + rectangles + '}';
     }
 }
