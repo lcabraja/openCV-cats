@@ -6,7 +6,6 @@
 package hr.algebra.rmi;
 
 import hr.algebra.OpenCVCats;
-import hr.algebra.caching.Cache;
 import hr.algebra.model.CachedResult;
 import hr.algebra.model.Solution;
 import java.io.File;

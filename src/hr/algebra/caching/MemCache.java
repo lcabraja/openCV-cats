@@ -10,8 +10,6 @@ import hr.algebra.model.Solution;
 import hr.algebra.utils.CollectionUtils;
 import java.io.File;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.opencv.core.Rect;
@@ -38,7 +36,7 @@ public class MemCache implements Cache {
 
     @Override
     public boolean containsSolution(File imageFile, String classifierPath) {
-        System.out.println("contains @ " + getClass().toString());
+        System.out.println("containsSolution @ " + getClass().toString());
         CachedResult cf = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
@@ -51,14 +49,15 @@ public class MemCache implements Cache {
     @Override
     public Optional<CachedResult> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
-        CachedResult cf = new CachedResult() {
+        CachedResult cr = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
             }
         };
-        if (solutions.containsKey(cf)) {
-            return Optional.of(CollectionUtils.getValueFromSet(solutions.keySet(), cf));
+        System.out.println(solutions.keySet());
+        if (solutions.containsKey(cr)) {
+            return Optional.of(CollectionUtils.getValueFromSet(solutions.keySet(), cr));
         }
         return Optional.empty();
     }
@@ -66,23 +65,26 @@ public class MemCache implements Cache {
     @Override
     public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
         System.out.println("setFaceRects @ " + getClass().toString());
-        CachedResult cf = new CachedResult() {
+        CachedResult cr = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
                 setRects(facesArray);
             }
         };
-        solutions.put(cf, null);
+        System.out.println(cr);
+        solutions.put(cr, null);
     }
 
     @Override
     public void setSolution(Solution solution) {
+        System.out.println("setSolution @ " + getClass().toString());
         solutions.put(solution.getCorrectSolution(), solution);
     }
 
     @Override
     public Optional<Solution> getSolution(CachedResult cr) {
+        System.out.println("getSolution @ " + getClass().toString());
         return solutions.containsKey(cr) && solutions.get(cr) != null
                 ? Optional.of(solutions.get(cr))
                 : Optional.empty();

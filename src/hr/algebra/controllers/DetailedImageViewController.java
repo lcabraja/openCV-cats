@@ -7,13 +7,16 @@ package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
 import hr.algebra.caching.Cache;
+import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.CachedResult;
 import hr.algebra.model.DetailedImageViewHolder;
+import hr.algebra.model.Solution;
 import hr.algebra.utils.ColorUtils;
 import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
 import hr.algebra.opencv.CascadeClassifierEnum;
+import hr.algebra.rmi.DirectoryClient;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -29,6 +32,7 @@ import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -86,6 +90,7 @@ public class DetailedImageViewController implements Initializable {
     private List<Boolean> correctangles;
     private int selectangle = 0;
     private String lastRectColor = null;
+    private CachedResult cr;
 
     @FXML
     private ListView<String> lvRectangles;
@@ -151,9 +156,11 @@ public class DetailedImageViewController implements Initializable {
             Optional<CachedResult> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
             if (potentialFaces.isPresent()) {
                 facesArray = potentialFaces.get().getRects();
+                cr = potentialFaces.get();
             } else {
                 detectRects(frame);
                 cache.setFaceRects(setImage, facesArray, faceCascadePath);
+                cr = cache.getFaceRects(setImage, faceCascadePath).get();
             }
             updateRectangleLists();
             drawRectangles(frame);
@@ -245,8 +252,13 @@ public class DetailedImageViewController implements Initializable {
     }
 
     @FXML
-    private void saveSolution(MouseEvent event) {
-
+    private void saveSolution(ActionEvent event) {
+        Solution solution = new Solution(facesArray, correctangles, cr);
+        if (holder.getReturnHolder().isPresent() && ((BulkImageViewHolder) holder.getReturnHolder().get()).isOnline()) {
+            new DirectoryClient().setSolution(solution);
+        } else {
+            OpenCVCats.cache.setSolution(solution);
+        }
     }
 
     @FXML
