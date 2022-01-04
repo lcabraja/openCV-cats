@@ -104,10 +104,21 @@ public class DetailedImageViewController implements Initializable {
         holder = ((DetailedImageViewHolder) OpenCVCats.getMainStage().getUserData());
         rbHaar.setToggleGroup(group);
         rbLbp.setToggleGroup(group);
-        rbHaar.setSelected(true);
+        setDefaultRadioButton();
         faceCascade = new CascadeClassifier();
-        radioSelection(CascadeClassifierEnum.HAARCASCADE.toString());
+        radioSelection(OpenCVCats.getSettings().getDefaultClassifier().toString());
         System.out.println("correctangles" + correctangles.size());
+    }
+
+    private void setDefaultRadioButton() {
+        switch (OpenCVCats.getSettings().getDefaultClassifier()) {
+            case HAARCASCADE:
+                rbHaar.selectedProperty().set(true);
+                break;
+            case LBPCASCADE:
+                rbLbp.selectedProperty().set(true);
+                break;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -235,7 +246,7 @@ public class DetailedImageViewController implements Initializable {
 
     @FXML
     private void saveSolution(MouseEvent event) {
-        
+
     }
 
     @FXML

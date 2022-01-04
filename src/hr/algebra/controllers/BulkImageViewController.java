@@ -9,6 +9,7 @@ import hr.algebra.OpenCVCats;
 import hr.algebra.model.BulkImageViewHolder;
 import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.SerializableImage;
+import hr.algebra.rmi.DirectoryClient;
 import hr.algebra.rmi.DirectoryServiceImpl;
 import hr.algebra.serving.Client;
 import hr.algebra.utils.FileUtils;
@@ -58,14 +59,7 @@ public class BulkImageViewController implements Initializable {
         System.out.println("initialize @ " + getClass().toString());
         try {
             holder = ((BulkImageViewHolder) OpenCVCats.getMainStage().getUserData());
-            ObservableList<String> oblist
-                    = FXCollections.observableList(
-                            holder
-                                    .getDirectoryContents()
-                                    .stream().map((file) -> file.getName())
-                                    .collect(Collectors.toList())
-                    );
-            lvItems.setItems(oblist);
+            initializeDirectories();
             // sets the selected image if present (when going back)
             if (holder.getSelectedIndex().isPresent()) {
                 int index = (int) holder.getSelectedIndex().get();
@@ -73,12 +67,32 @@ public class BulkImageViewController implements Initializable {
                 lvItems.scrollTo(index);
                 updateImage();
             }
-            // set RMI data
-            DirectoryServiceImpl.setStaticDirectory(holder.getSelectedDirectory().getAbsolutePath());
-            DirectoryServiceImpl.setStaticFiles(new ArrayList<>(oblist));
         } catch (InterruptedException | FileNotFoundException ex) {
             Logger.getLogger(BulkImageViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private void initializeDirectories() {
+        ObservableList<String> oblist;
+        if (holder.getDirectoryContents() != null) {
+            oblist = FXCollections.observableList(
+                    holder
+                            .getDirectoryContents()
+                            .stream().map((file) -> file.getName())
+                            .collect(Collectors.toList())
+            );
+            // set RMI data
+            DirectoryServiceImpl.setStaticDirectory(holder.getSelectedDirectory().getAbsolutePath());
+            DirectoryServiceImpl.setStaticFiles(new ArrayList<>(holder.getDirectoryContents()));
+        } else {
+            oblist = FXCollections.observableList(
+                    new DirectoryClient().getFiles()
+                            .stream().map((file) -> file.getName())
+                            .collect(Collectors.toList())
+            );
+        }
+        lvItems.setItems(oblist);
+
     }
 
     @FXML

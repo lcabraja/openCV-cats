@@ -7,6 +7,7 @@ package hr.algebra.rmi;
 
 import hr.algebra.model.CachedResult;
 import hr.algebra.model.Solution;
+import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -21,7 +22,7 @@ public interface DirectoryService extends Remote {
 
     public String getDirectoryPath() throws RemoteException;
 
-    public List<String> getFiles() throws RemoteException;
+    public List<File> getFiles() throws RemoteException;
 
     public Solution getSolution(CachedResult cr) throws RemoteException;
 

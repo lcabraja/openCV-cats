@@ -151,7 +151,7 @@ public class MainMenuController implements Initializable {
                     .getMainStage()
                     .setUserData(new BulkImageViewHolder(
                             directory,
-                            JNDIUtils.listDirectoryContents(directory, FileUtils.Extensions.JPG),
+                            null,
                             true
                     ));
             saveLastDirectory(directoryPath);
@@ -190,9 +190,10 @@ public class MainMenuController implements Initializable {
     }
 
     @FXML
-    private void openSettings(ActionEvent event) {
+    private void openSettings(ActionEvent event) throws IOException {
         System.out.println("openSettings @ " + getClass().toString());
-        JNDIUtils.listDirectoryContents("C:\\Users\\lcabraja\\Downloads\\archive\\CAT_00", FileUtils.Extensions.JPG).forEach(System.out::println);
+        ViewUtils.loadView(getClass().getResource("views/SettingsView.fxml"));
+
     }
 
     @FXML

@@ -13,14 +13,12 @@ import hr.algebra.rmi.RMIServiceHost;
 import hr.algebra.serving.LiveServer;
 import hr.algebra.serving.Server;
 import hr.algebra.utils.ViewUtils;
+import hr.algebra.xml.Settings;
+import hr.algebra.xml.SettingsHandler;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
@@ -32,7 +30,16 @@ import org.opencv.core.Core;
  */
 public class OpenCVCats extends Application {
 
-    public static final String HOST = "localhost";
+    private static Settings settings;
+
+    public static Settings getSettings() {
+        return settings;
+    }
+
+    public static void updateSettings(Settings settings) {
+        OpenCVCats.settings = settings;
+    }
+
     public static final Cache cache = new MemCache();
     private static Stage mainStage;
 
@@ -54,6 +61,7 @@ public class OpenCVCats extends Application {
     @Descriptor("Main method")
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        settings = SettingsHandler.getLastSettings();
         initProcess();
         launch(args);
     }
@@ -75,17 +83,11 @@ public class OpenCVCats extends Application {
         primaryStage.initStyle(StageStyle.UNIFIED);
         primaryStage.setTitle(generateWindowTitle());
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
-            try {
-                MusicPlayer.playEndingSound();
-                RMIServiceHost.stopServices();
-                Server.stopServer();
-                LiveServer.stopServer();
-                playExitAnimation();
-                stop();
-                System.exit(0);
-            } catch (Exception ex) {
-                System.exit(1);
-            }
+            MusicPlayer.playEndingSound();
+            RMIServiceHost.stopServices();
+            Server.stopServer();
+            LiveServer.stopServer();
+            playExitAnimation();
         });
     }
 
@@ -112,21 +114,8 @@ public class OpenCVCats extends Application {
                 Thread.sleep(3);
                 getMainStage().opacityProperty().set(1 - i);
             } catch (InterruptedException ex) {
-                System.out.println("got interrupted");
                 Logger.getLogger(OpenCVCats.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println("got to the end");
     }
-
-    private void playEndingSound() {
-        try {
-            Media media = new Media(getClass().getResource("music/quack.mp3").toURI().toString());
-            MediaPlayer player = new MediaPlayer(media);
-            player.play();
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(OpenCVCats.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
 }

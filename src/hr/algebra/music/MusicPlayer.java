@@ -6,6 +6,8 @@
 package hr.algebra.music;
 
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
@@ -18,10 +20,13 @@ public class MusicPlayer {
     private MusicPlayer() {
     }
 
-    public static void playEndingSound() throws URISyntaxException {
-        Media media = new Media(MusicPlayer.class.getResource("quack.mp3").toURI().toString());
-        System.out.println(media.getSource());
-        MediaPlayer player = new MediaPlayer(media);
-        player.play();
+    public static void playEndingSound() {
+        try {
+            Media media = new Media(MusicPlayer.class.getResource("quack.mp3").toURI().toString());
+            MediaPlayer player = new MediaPlayer(media);
+            player.play();
+        } catch (URISyntaxException ex) {
+            System.err.println("Could not play ending tune...");
+        }
     }
 }

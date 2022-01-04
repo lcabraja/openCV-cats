@@ -9,6 +9,7 @@ import hr.algebra.OpenCVCats;
 import hr.algebra.caching.Cache;
 import hr.algebra.model.CachedResult;
 import hr.algebra.model.Solution;
+import java.io.File;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Optional;
@@ -19,16 +20,17 @@ import java.util.Optional;
  */
 public class DirectoryServiceImpl implements DirectoryService {
 
-    private static List<String> files = null;
+    private static List<File> files = null;
     private static String directory = null;
 
-    public static List<String> getStaticFiles() {
+    public static List<File> getStaticFiles() {
         System.out.println("getStaticFiles @ " + DirectoryServiceImpl.class);
         return files;
     }
 
-    public static void setStaticFiles(List<String> files) {
+    public static void setStaticFiles(List<File> files) {
         System.out.println("setStaticFiles @ " + DirectoryServiceImpl.class);
+        System.out.println(files);
         DirectoryServiceImpl.files = files;
     }
 
@@ -49,7 +51,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public List<String> getFiles() throws RemoteException {
+    public List<File> getFiles() throws RemoteException {
         System.out.println("getFiles @ " + getClass().toString());
         return files;
     }

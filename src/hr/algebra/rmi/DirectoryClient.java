@@ -8,6 +8,7 @@ package hr.algebra.rmi;
 import hr.algebra.OpenCVCats;
 import hr.algebra.model.CachedResult;
 import hr.algebra.model.Solution;
+import java.io.File;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -27,9 +28,9 @@ public class DirectoryClient implements DirectoryService {
     private boolean initialized = false;
 
     public DirectoryClient() {
-        System.out.println("Locating registry on " + OpenCVCats.HOST + ":" + RMIServiceHost.RMI_PORT);
+        System.out.println("Locating registry on " + OpenCVCats.getSettings().getDefaultHost() + ":" + RMIServiceHost.RMI_PORT);
         try {
-            registry = LocateRegistry.getRegistry(OpenCVCats.HOST, RMIServiceHost.RMI_PORT);
+            registry = LocateRegistry.getRegistry(OpenCVCats.getSettings().getDefaultHost(), RMIServiceHost.RMI_PORT);
             stub = (DirectoryService) registry.lookup(DirectoryService.REMOTE_OBJECT_NAME);
             initialized = true;
         } catch (RemoteException | NotBoundException ex) {
@@ -39,10 +40,11 @@ public class DirectoryClient implements DirectoryService {
 
     @Override
     public String getDirectoryPath() {
+        System.out.println("getDirectoryPath @ " + getClass().toString());
         if (!initialized) {
+            System.out.println("DirectoryClient uninitialized...");
             return null;
         }
-        System.out.println("getDirectoryPath @ " + getClass().toString());
         try {
             return stub.getDirectoryPath();
         } catch (RemoteException ex) {
@@ -52,12 +54,14 @@ public class DirectoryClient implements DirectoryService {
     }
 
     @Override
-    public List<String> getFiles() {
+    public List<File> getFiles() {
+        System.out.println("getFiles @ " + getClass().toString());
         if (!initialized) {
+            System.out.println("DirectoryClient uninitialized...");
             return null;
         }
         try {
-            stub.getFiles();
+            return stub.getFiles();
         } catch (RemoteException ex) {
             Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -66,7 +70,9 @@ public class DirectoryClient implements DirectoryService {
 
     @Override
     public Solution getSolution(CachedResult cr) {
+        System.out.println("getSolution @ " + getClass().toString());
         if (!initialized) {
+            System.out.println("DirectoryClient uninitialized...");
             return null;
         }
         try {
@@ -79,7 +85,9 @@ public class DirectoryClient implements DirectoryService {
 
     @Override
     public void setSolution(Solution solution) {
+        System.out.println("setSolution @ " + getClass().toString());
         if (!initialized) {
+            System.out.println("DirectoryClient uninitialized...");
             return;
         }
         try {

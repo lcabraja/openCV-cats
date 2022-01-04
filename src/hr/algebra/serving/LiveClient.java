@@ -30,7 +30,7 @@ public class LiveClient {
     }
 
     private static void sendImageThread(ObjectProperty<Image> canvas) {
-        try (Socket clientSocket = new Socket(OpenCVCats.HOST, LiveServer.PORT)) {
+        try (Socket clientSocket = new Socket(OpenCVCats.getSettings().getDefaultHost(), LiveServer.PORT)) {
             System.err.println("Client connecting onto: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
             send(clientSocket, canvas);
         } catch (IOException ex) {

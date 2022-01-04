@@ -5,6 +5,7 @@
  */
 package hr.algebra.controllers;
 
+import hr.algebra.OpenCVCats;
 import hr.algebra.model.SerializableImage;
 import hr.algebra.serving.LiveClient;
 import hr.algebra.serving.LiveServer;
@@ -75,7 +76,7 @@ public class CameraImageViewController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         cameraCount = countCameras();
         faceCascade = new CascadeClassifier();
-        faceCascade.load(CascadeClassifierEnum.HAARCASCADE.toString()); // selects the haar cascade as the default cascade
+        faceCascade.load(OpenCVCats.getSettings().getDefaultClassifier().toString());
         runCamera();
     }
 
