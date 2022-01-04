@@ -29,7 +29,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     public static void setStaticFiles(List<File> files) {
         System.out.println("setStaticFiles @ " + DirectoryServiceImpl.class);
-        System.out.println(files);
         DirectoryServiceImpl.files = files;
     }
 
@@ -57,6 +56,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     @Override
     public Solution getSolution(CachedResult cr) throws RemoteException {
+        System.out.println("getSolution @ " + getClass().toString());
         Optional<Solution> solution = OpenCVCats.cache.getSolution(cr);
         System.out.println(solution);
         return solution.isPresent() ? solution.get() : null;
@@ -64,6 +64,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     @Override
     public void setSolution(Solution solution) {
+        System.out.println("setSolution @ " + getClass().toString());
         OpenCVCats.cache.setSolution(solution);
         System.out.println(solution);
     }

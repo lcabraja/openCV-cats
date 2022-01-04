@@ -88,6 +88,7 @@ public class OpenCVCats extends Application {
             Server.stopServer();
             LiveServer.stopServer();
             playExitAnimation();
+            System.exit(0);
         });
     }
 

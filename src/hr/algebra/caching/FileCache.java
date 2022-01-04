@@ -44,7 +44,7 @@ public class FileCache implements Cache {
     @Override
     public Optional<CachedResult> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
-        CachedResult cf = new CachedResult() {
+        CachedResult cr = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
@@ -54,8 +54,8 @@ public class FileCache implements Cache {
         if (deserializedCache.isPresent()) {
 
             Set<CachedResult> results = deserializedCache.get();
-            if (results.contains(cf)) {
-                return Optional.of(CollectionUtils.getValueFromSet(results, cf));
+            if (results.contains(cr)) {
+                return Optional.of(CollectionUtils.getValueFromSet(results, cr));
             }
         }
         return Optional.empty();
@@ -69,9 +69,9 @@ public class FileCache implements Cache {
     }
 
     @Override
-    public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
+    public CachedResult setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
         System.out.println("setFaceRects @ " + getClass().toString());
-        CachedResult cf = new CachedResult() {
+        CachedResult cr = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
@@ -84,8 +84,9 @@ public class FileCache implements Cache {
         } else {
             previousSerialization = new HashSet<>();
         }
-        previousSerialization.add(cf);
+        previousSerialization.add(cr);
         SerializationUtils.updateSerializedItem((Serializable) previousSerialization, SerializationUtils.RECT_SERIALIZATION);
+        return cr;
     }
 
     @Override

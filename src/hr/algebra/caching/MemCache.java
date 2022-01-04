@@ -21,6 +21,7 @@ import org.opencv.core.Rect;
 public class MemCache implements Cache {
 
     private final Map<CachedResult, Solution> solutions = new HashMap<>();
+    private final Map<CachedResult, CachedResult> results = new HashMap<>();
 
     @Override
     public boolean contains(File imageFile, String classifierPath) {
@@ -31,7 +32,7 @@ public class MemCache implements Cache {
                 setClassifierPath(classifierPath);
             }
         };
-        return solutions.containsKey(cf);
+        return results.get(cf) != null;
     }
 
     @Override
@@ -55,15 +56,14 @@ public class MemCache implements Cache {
                 setClassifierPath(classifierPath);
             }
         };
-        System.out.println(solutions.keySet());
-        if (solutions.containsKey(cr)) {
-            return Optional.of(CollectionUtils.getValueFromSet(solutions.keySet(), cr));
-        }
-        return Optional.empty();
+        CachedResult cached = results.get(cr);
+        return cached != null
+                ? Optional.of(cached)
+                : Optional.empty();
     }
 
     @Override
-    public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
+    public CachedResult setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
         System.out.println("setFaceRects @ " + getClass().toString());
         CachedResult cr = new CachedResult() {
             {
@@ -72,8 +72,8 @@ public class MemCache implements Cache {
                 setRects(facesArray);
             }
         };
-        System.out.println(cr);
-        solutions.put(cr, null);
+        results.put(cr, cr);
+        return cr;
     }
 
     @Override

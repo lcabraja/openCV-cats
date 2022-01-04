@@ -58,27 +58,36 @@ public class CachedResult implements Serializable {
     @Override
     public int hashCode() {
         int hash = 5;
+        hash *= this.filePath.hashCode();
+        hash *= this.classifierPath.hashCode();
         return hash;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
+            System.out.println("1");
             return true;
         }
         if (obj == null) {
+            System.out.println("null 2");
             return false;
         }
         if (getClass() != obj.getClass()) {
+            System.out.println(getClass());
+            System.out.println(obj.getClass());
             return false;
         }
         final CachedResult other = (CachedResult) obj;
         if (!Objects.equals(this.filePath, other.filePath)) {
+            System.out.println("4");
             return false;
         }
         if (!Objects.equals(this.classifierPath, other.classifierPath)) {
+            System.out.println("5");
             return false;
         }
+        System.out.println("6");
         return true;
     }
 

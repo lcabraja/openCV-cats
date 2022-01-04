@@ -73,14 +73,14 @@ public class CameraImageViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cameraCount = countCameras();
+        cameraCount = 1; //countCameras();
         faceCascade = new CascadeClassifier();
         faceCascade.load(OpenCVCats.getSettings().getDefaultClassifier().toString());
-        runCamera();
+        new Thread(() -> runCamera()).start();
     }
 
     private void runCamera() {
-        this.capture = new VideoCapture(0);
+        this.capture = new VideoCapture(1);
         Runnable imageUpdater = () -> {
             System.out.println("runnable @ " + getClass().toString());
             Mat frame = new Mat();
@@ -93,20 +93,22 @@ public class CameraImageViewController implements Initializable {
                     // if the frame is not empty, process it
                     if (!frame.empty()) {
                         // face detection
-                        System.out.println("if" + currentCamera);
                         detectAndDisplay(frame);
                         Image imageToShow = ImageUtils.mat2Image(frame);
                         ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
                         LiveServer.serializableImage = new SerializableImage(imageToShow);
                     } else {
-                        System.out.println("else");
-                        if (currentCamera >= cameraCount) {
-                            hasCamera = false;
-                        } else {
-                            this.capture.release();
-                            this.capture.open(++cameraCount);
-                        }
+                        hasCamera = false;
                     }
+//                    else {
+//                        System.out.println("else");
+//                        if (currentCamera >= cameraCount) {
+//                            hasCamera = false;
+//                        } else {
+//                            this.capture.release(); 
+//                            this.capture.open(++cameraCount);
+//                        }
+//                    }
                 } else {
                     System.out.println("Reguesting new image frame");
                     LiveClient.requestImage(originalFrame.imageProperty());

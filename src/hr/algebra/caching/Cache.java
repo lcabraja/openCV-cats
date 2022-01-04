@@ -19,7 +19,7 @@ public interface Cache {
     public boolean contains(File imageFile, String classifierPath);
     public boolean containsSolution(File imageFile, String classifierPath);
     
-    public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath);
+    public CachedResult setFaceRects(File imageFile, Rect[] facesArray, String classifierPath);
     public Optional<CachedResult> getFaceRects(File imageFile, String classifierPath);
     
     public void setSolution(Solution solution);

@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -101,7 +102,7 @@ public class DetailedImageViewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
-        initFields();
+        new Thread(() -> initFields()).start();
         //test();
     }
 
@@ -159,8 +160,7 @@ public class DetailedImageViewController implements Initializable {
                 cr = potentialFaces.get();
             } else {
                 detectRects(frame);
-                cache.setFaceRects(setImage, facesArray, faceCascadePath);
-                cr = cache.getFaceRects(setImage, faceCascadePath).get();
+                cr = cache.setFaceRects(setImage, facesArray, faceCascadePath);
             }
             updateRectangleLists();
             drawRectangles(frame);
@@ -227,13 +227,19 @@ public class DetailedImageViewController implements Initializable {
         int count = (int) correctangles.stream().filter(value -> value).count();
         switch (count) {
             case 0:
-                lbRectangles.setText("Detected no cats");
+                Platform.runLater(() -> {
+                    lbRectangles.textProperty().set("Detected no cats");
+                });
                 break;
             case 1:
-                lbRectangles.setText("Detected 1 cat");
+                Platform.runLater(() -> {
+                    lbRectangles.textProperty().set("Detected 1 cat");
+                });
                 break;
             default:
-                lbRectangles.setText(String.format("Detected %d cats", count));
+                Platform.runLater(() -> {
+                    lbRectangles.textProperty().set(String.format("Detected %d cats", count));
+                });
                 break;
         }
     }
