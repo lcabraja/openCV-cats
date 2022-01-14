@@ -23,7 +23,7 @@ public class MusicPlayer {
             Media media = new Media(MusicPlayer.class.getResource("quack.mp3").toURI().toString());
             MediaPlayer player = new MediaPlayer(media);
             player.play();
-        } catch (URISyntaxException ex) {
+        } catch (Exception ex) {
             System.err.println("Could not play ending tune...");
         }
     }

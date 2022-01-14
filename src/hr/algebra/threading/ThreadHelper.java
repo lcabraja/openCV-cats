@@ -6,9 +6,15 @@
 package hr.algebra.threading;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,65 +23,117 @@ import java.util.concurrent.Executors;
 public class ThreadHelper {
 
     public static boolean fileEnqueued;
-    public static boolean fileCopied;
-    public static boolean launched;
+    private boolean launched;
     public static int filesCopied;
+    private boolean[] threads;
 
-    private static File imageToSend = null;
-    private static List<File> filesToSend = null;
-    private static File destination = null;
+    private File imageToSend = null;
+    private final List<File> filesToSend;
 
     public ThreadHelper(List<File> filesToSend, File destination) {
-        setFilesToSend(filesToSend);
-        setDestination(destination);
+        this.filesToSend = filesToSend;
+        this.destination = destination;
     }
 
     public void launchThreads(int count) {
-        if (!hasFiles()) {
-            return;
-        }
         count = count > filesToSend.size() ? filesToSend.size() : count;
         System.out.println("count " + count);
         ExecutorService executor = Executors.newFixedThreadPool(count);
+        threads = new boolean[count];
         int lastIndex = 0;
         for (int i = 0; i < count; i++) {
-            int nextIndex = i == count - 1 ? filesToSend.size() : lastIndex + filesToSend.size() / count;
-            executor.execute(new FileQueuerThread(filesToSend.subList(lastIndex, nextIndex)));
-            lastIndex = nextIndex;
+            final int nextIndexFinal = i == count - 1 ? filesToSend.size() : lastIndex + filesToSend.size() / count;
+            final int lastIndexFinal = lastIndex;
+            final int threadIndex = i;
+            executor.execute(new Thread(() -> {
+                final List<File> subList = filesToSend.subList(lastIndexFinal, nextIndexFinal);
+                int lastFileIndex = subList.size() - 1;
+                while (lastFileIndex >= 0) {
+                    lastFileIndex = Pack(subList, lastFileIndex, threadIndex);
+                }
+                System.out.println("Queuer (" + hashCode() + ") done ");
+                threads[threadIndex] = true;
+            }));
+            lastIndex = nextIndexFinal;
         }
-        ExecutorService executor2 = Executors.newFixedThreadPool(1);
-        executor.execute(new FileUploaderThread(destination));
+        executor.execute(new Thread(() -> {
+            while (!areThreadsDone(threads)) {
+                Upload();
+            }
+            launched = false;
+            System.out.println("Uploader (" + hashCode() + ") done ");
+        }));
         launched = true;
     }
 
-    public static File getImageToSend() {
+    public File getImageToSend() {
         return imageToSend;
     }
 
-    public static void setImageToSend(File fileToSend) {
-        ThreadHelper.imageToSend = fileToSend;
+    public void setImageToSend(File fileToSend) {
+        this.imageToSend = fileToSend;
     }
 
-    public static File getDestination() {
+    public File getDestination() {
         return destination;
     }
 
-    public static void setDestination(File destination) {
-        ThreadHelper.destination = destination;
+    public boolean isLaunched() {
+        return launched;
     }
 
-    public static void setFilesToSend(List<File> files) {
-        filesToSend = files;
-        filesCopied = files.size();
+    private synchronized int Pack(List<File> filesToSend, int lastFileIndex, int threadIndex) {
+        while (ThreadHelper.fileEnqueued) {
+            try {
+                System.out.println("Queuer [" + threadIndex + "] waiting " + ThreadHelper.fileEnqueued);
+                wait();
+            } catch (InterruptedException e) {
+            }
+        }
+        System.out.println("Queuer [" + threadIndex + "] in, lastIndex = " + lastFileIndex);
+        File imageToupload = filesToSend.get(lastFileIndex--);
+        setImageToSend(imageToupload);
+        ThreadHelper.filesCopied--;
+        ThreadHelper.fileEnqueued = true;
+        notifyAll();
+        return lastFileIndex;
     }
 
-    public static void removeFile(File file) {
-        System.out.println("Removing file " + file.getName() + "... " + filesToSend.size() + " left...");
-        filesToSend.remove(file);
+    private final File destination;
+
+    private synchronized void Upload() {
+        while (!ThreadHelper.fileEnqueued) {
+            try {
+                System.out.println("Uploader waiting " + ThreadHelper.fileEnqueued);
+                wait();
+            } catch (InterruptedException e) {
+            }
+        }
+        ThreadHelper.fileEnqueued = true;
+        System.out.println("Uploader in");
+        try {
+            Files.copy(Paths.get(getImageToSend().getAbsolutePath()), Paths.get(destination.getAbsolutePath(), "/" + getImageToSend().getName()), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("Uploader copied");
+        ThreadHelper.fileEnqueued = false;
+        imageToSend = null;
+        notifyAll();
     }
 
-    public static boolean hasFiles() {
-        return filesToSend != null && filesToSend.size() > 0;
+    private boolean areThreadsDone(boolean[] threads) {
+//        for (boolean thread : threads) {
+//            if (!thread) {
+//                return false;
+//            }
+//        }
+        for (int i = 0; i < threads.length; i++) {
+            System.out.println("Queuer [" + i + "] " + (threads[i] ? "done" : "working"));
+            if (!threads[i]) {
+                return false;
+            }
+        }
+        return true;
     }
-
 }

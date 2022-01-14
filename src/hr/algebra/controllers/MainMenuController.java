@@ -199,19 +199,25 @@ public class MainMenuController implements Initializable {
 
     @FXML
     private void downloadFolder(ActionEvent event) {
-        if (!threadHelper.launched) {
+        if (threadHelper == null || !threadHelper.isLaunched()) {
             System.out.println("downloadFolder @ " + getClass().toString());
-//        Optional<File> uploadDirectory = FileUtils.uploadDirectory(OpenCVCats.getMainStage(), null);
-//        Optional<File> downloadDirectory = FileUtils.uploadDirectory(OpenCVCats.getMainStage(), null);
-//        if (uploadDirectory.isPresent() && downloadDirectory.isPresent()) {
-//            ThreadHelper.setFilesToSend(JNDIUtils.listDirectoryContents(uploadDirectory.get(), FileUtils.Extensions.JPG));
-            List<File> filesToSend = JNDIUtils.listDirectoryContents(new File("C:\\Users\\lcabraja\\Desktop\\soruce"), FileUtils.Extensions.JPG);
-            File destination = new File("C:\\Users\\lcabraja\\Desktop\\temp");
-            threadHelper = new ThreadHelper(filesToSend, destination);
-            threadHelper.launchThreads(10);
-//        }
-        } else {
-            System.out.println(threadHelper);
+
+            Optional<File> uploadDirectory;
+            Optional<File> downloadDirectory;
+            boolean testing = false;
+            if (testing) {
+                uploadDirectory = Optional.of(new File("C:\\Users\\lcabraja\\Desktop\\soruce"));
+                downloadDirectory = Optional.of(new File("C:\\Users\\lcabraja\\Desktop\\temp"));
+            } else {
+                uploadDirectory = FileUtils.uploadDirectory(OpenCVCats.getMainStage(), null);
+                downloadDirectory = FileUtils.uploadDirectory(OpenCVCats.getMainStage(), null);
+            }
+            if (uploadDirectory.isPresent() && downloadDirectory.isPresent()) {
+                File destination = downloadDirectory.get();
+                List<File> filesToSend = JNDIUtils.listDirectoryContents(uploadDirectory.get(), FileUtils.Extensions.JPG);
+                threadHelper = new ThreadHelper(filesToSend, destination);
+                threadHelper.launchThreads(10);
+            }
         }
     }
 
