@@ -53,7 +53,6 @@ public class Server {
                 Socket clientSocket = serverSocket.accept();
                 System.err.println("Client connected from port:  " + clientSocket.getPort());
                 new Thread(() -> processMessage(clientSocket)).start();
-
             }
         } catch (BindException ex) {
             System.err.println("Unable to bind TCP Port " + PORT);

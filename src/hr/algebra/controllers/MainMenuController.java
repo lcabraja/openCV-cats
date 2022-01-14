@@ -11,8 +11,10 @@ import hr.algebra.model.DetailedImageViewHolder;
 import hr.algebra.model.SerializableImage;
 import hr.algebra.model.UIStateHolder;
 import hr.algebra.rmi.DirectoryClient;
+import hr.algebra.threading.ThreadHelper;
 import hr.algebra.utils.DocumentationUtils;
 import hr.algebra.utils.FileUtils;
+import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.JNDIUtils;
 import hr.algebra.utils.SerializationUtils;
 import hr.algebra.utils.ViewUtils;
@@ -20,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -27,6 +30,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 /**
  * FXML Controller class
@@ -40,7 +44,11 @@ public class MainMenuController implements Initializable {
     @FXML
     private Button btnLastFolder;
 
+    @FXML
+    private ImageView ivGlassPane;
+
     Optional<UIStateHolder> state;
+    ThreadHelper threadHelper;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -190,10 +198,27 @@ public class MainMenuController implements Initializable {
     }
 
     @FXML
+    private void downloadFolder(ActionEvent event) {
+        if (!threadHelper.launched) {
+            System.out.println("downloadFolder @ " + getClass().toString());
+//        Optional<File> uploadDirectory = FileUtils.uploadDirectory(OpenCVCats.getMainStage(), null);
+//        Optional<File> downloadDirectory = FileUtils.uploadDirectory(OpenCVCats.getMainStage(), null);
+//        if (uploadDirectory.isPresent() && downloadDirectory.isPresent()) {
+//            ThreadHelper.setFilesToSend(JNDIUtils.listDirectoryContents(uploadDirectory.get(), FileUtils.Extensions.JPG));
+            List<File> filesToSend = JNDIUtils.listDirectoryContents(new File("C:\\Users\\lcabraja\\Desktop\\soruce"), FileUtils.Extensions.JPG);
+            File destination = new File("C:\\Users\\lcabraja\\Desktop\\temp");
+            threadHelper = new ThreadHelper(filesToSend, destination);
+            threadHelper.launchThreads(10);
+//        }
+        } else {
+            System.out.println(threadHelper);
+        }
+    }
+
+    @FXML
     private void openSettings(ActionEvent event) throws IOException {
         System.out.println("openSettings @ " + getClass().toString());
         ViewUtils.loadView(getClass().getResource("views/SettingsView.fxml"));
-
     }
 
     @FXML
