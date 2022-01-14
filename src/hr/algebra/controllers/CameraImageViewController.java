@@ -5,12 +5,12 @@
  */
 package hr.algebra.controllers;
 
+import hr.algebra.OpenCVCats;
 import hr.algebra.model.SerializableImage;
 import hr.algebra.serving.LiveClient;
 import hr.algebra.serving.LiveServer;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -40,9 +40,9 @@ import org.opencv.videoio.VideoCapture;
  */
 public class CameraImageViewController implements Initializable {
 
-    private static int maxTested = 10;
+    private static final int MAX_TESTED = 10;
     private static int cameraCount;
-    private int currentCamera = 0;
+    private final int currentCamera = 0;
 
     private CascadeClassifier faceCascade;
     private int absoluteFaceSize;
@@ -62,38 +62,25 @@ public class CameraImageViewController implements Initializable {
      * Initializes the controller class.
      */
     int countCameras() {
+        int i = -1;
         VideoCapture temp_camera = new VideoCapture(0);
-
-        for (int i = 1; i < maxTested; i++) {
-            boolean res = (!temp_camera.isOpened());
+        while (i < MAX_TESTED && temp_camera.isOpened()) {
             temp_camera.release();
-            temp_camera.open(i);
-            if (res) {
-                System.out.println("nothing on " + i);
-            }
+            temp_camera.open(++i);
         }
-        temp_camera.release();
-        return maxTested;
+        return i;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cameraCount = countCameras();
-        if (cameraCount > 0) {
-            this.capture = new VideoCapture(7);
-        }
-        System.out.println("cameras " + countCameras());
+        cameraCount = 1; //countCameras();
         faceCascade = new CascadeClassifier();
-        faceCascade.load("resources/haarcascades/haarcascade_frontalcatface.xml"); // selects the haar cascade as the default cascade
-        try {
-            runCamera();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(CameraImageViewController.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        faceCascade.load(OpenCVCats.getSettings().getDefaultClassifier().toString());
+        new Thread(() -> runCamera()).start();
     }
 
-    private void runCamera() throws FileNotFoundException {
-
+    private void runCamera() {
+        this.capture = new VideoCapture(1);
         Runnable imageUpdater = () -> {
             System.out.println("runnable @ " + getClass().toString());
             Mat frame = new Mat();
@@ -101,25 +88,27 @@ public class CameraImageViewController implements Initializable {
             try {
                 // read the current frame
                 if (cameraCount > 0 && hasCamera) {
-
                     this.capture.read(frame);
 
                     // if the frame is not empty, process it
                     if (!frame.empty()) {
-                        System.out.println("test");
                         // face detection
                         detectAndDisplay(frame);
                         Image imageToShow = ImageUtils.mat2Image(frame);
                         ImageUtils.onFXThread(originalFrame.imageProperty(), imageToShow);
                         LiveServer.serializableImage = new SerializableImage(imageToShow);
                     } else {
-                        if (currentCamera >= cameraCount) {
-                            hasCamera = false;
-                        } else {
-                            this.capture.release();
-                            this.capture.open(++cameraCount);
-                        }
+                        hasCamera = false;
                     }
+//                    else {
+//                        System.out.println("else");
+//                        if (currentCamera >= cameraCount) {
+//                            hasCamera = false;
+//                        } else {
+//                            this.capture.release(); 
+//                            this.capture.open(++cameraCount);
+//                        }
+//                    }
                 } else {
                     System.out.println("Reguesting new image frame");
                     LiveClient.requestImage(originalFrame.imageProperty());
@@ -131,9 +120,7 @@ public class CameraImageViewController implements Initializable {
         };
 
         timer = Executors.newSingleThreadScheduledExecutor();
-
-        timer.scheduleAtFixedRate(imageUpdater,
-                0, 100, TimeUnit.MILLISECONDS);
+        timer.scheduleAtFixedRate(imageUpdater, 0, 100, TimeUnit.MILLISECONDS);
     }
 
     private void detectAndDisplay(Mat frame) {

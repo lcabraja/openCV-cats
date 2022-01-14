@@ -5,7 +5,9 @@
  */
 package hr.algebra.caching;
 
-import hr.algebra.model.CachedFile;
+import hr.algebra.model.CachedResult;
+import hr.algebra.model.Solution;
+import hr.algebra.utils.CollectionUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,48 +20,73 @@ import org.opencv.core.Rect;
  */
 public class MemCache implements Cache {
 
-//    private Map<CachedFile, Rect[]>> 
-    private final Map<CachedFile, Rect[]> faces = new HashMap<>();
+    private final Map<CachedResult, Solution> solutions = new HashMap<>();
+    private final Map<CachedResult, CachedResult> results = new HashMap<>();
 
     @Override
     public boolean contains(File imageFile, String classifierPath) {
         System.out.println("contains @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cf = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
             }
         };
-        if (faces.containsKey(cf)) {
-            return faces.containsKey(cf);
-        }
-        return false;
+        return results.get(cf) != null;
     }
 
     @Override
-    public Optional<Rect[]> getFaceRects(File imageFile, String classifierPath) {
+    public boolean containsSolution(File imageFile, String classifierPath) {
+        System.out.println("containsSolution @ " + getClass().toString());
+        CachedResult cf = new CachedResult() {
+            {
+                setFilePath(imageFile.getAbsolutePath());
+                setClassifierPath(classifierPath);
+            }
+        };
+        return solutions.get(cf) != null;
+    }
+
+    @Override
+    public Optional<CachedResult> getFaceRects(File imageFile, String classifierPath) {
         System.out.println("getFaceRects @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cr = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
             }
         };
-        if (faces.containsKey(cf)) {
-            return Optional.of(faces.get(cf));
-        }
-        return Optional.empty();
+        CachedResult cached = results.get(cr);
+        return cached != null
+                ? Optional.of(cached)
+                : Optional.empty();
     }
 
     @Override
-    public void setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
+    public CachedResult setFaceRects(File imageFile, Rect[] facesArray, String classifierPath) {
         System.out.println("setFaceRects @ " + getClass().toString());
-        CachedFile cf = new CachedFile() {
+        CachedResult cr = new CachedResult() {
             {
                 setFilePath(imageFile.getAbsolutePath());
                 setClassifierPath(classifierPath);
+                setRects(facesArray);
             }
         };
-        faces.put(cf, facesArray);
+        results.put(cr, cr);
+        return cr;
+    }
+
+    @Override
+    public void setSolution(Solution solution) {
+        System.out.println("setSolution @ " + getClass().toString());
+        solutions.put(solution.getCorrectSolution(), solution);
+    }
+
+    @Override
+    public Optional<Solution> getSolution(CachedResult cr) {
+        System.out.println("getSolution @ " + getClass().toString());
+        return solutions.containsKey(cr) && solutions.get(cr) != null
+                ? Optional.of(solutions.get(cr))
+                : Optional.empty();
     }
 }

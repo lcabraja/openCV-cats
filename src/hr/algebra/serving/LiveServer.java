@@ -6,17 +6,13 @@
 package hr.algebra.serving;
 
 import hr.algebra.model.SerializableImage;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.image.Image;
 
 /**
  *
@@ -25,10 +21,15 @@ import javafx.scene.image.Image;
 public class LiveServer {
 
     public static final int PORT = 23456;
-    public static final String HOST = "localhost";
     public static SerializableImage serializableImage = null;
 
     private static Thread serverThread = null;
+
+    private static boolean initialized = false;
+
+    public static boolean isInitialized() {
+        return initialized;
+    }
 
     public static void startServer() {
         if (serverThread == null) {
@@ -44,6 +45,7 @@ public class LiveServer {
     private static void receiveMessages() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.err.println("Server listening on port: " + serverSocket.getLocalPort());
+            initialized = true;
             while (!Thread.currentThread().isInterrupted()) {
                 Socket clientSocket = serverSocket.accept();
                 System.err.println("Client connected from port:  " + clientSocket.getPort());
@@ -51,6 +53,7 @@ public class LiveServer {
             }
         } catch (BindException ex) {
             System.err.println("Unable to bind TCP Port " + PORT);
+            initialized = false;
         } catch (IOException ex) {
             Logger.getLogger(LiveServer.class.getName()).log(Level.SEVERE, null, ex);
         }

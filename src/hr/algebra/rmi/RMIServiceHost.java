@@ -27,7 +27,11 @@ public class RMIServiceHost {
     private static Registry registry;
     private static DirectoryService skeleton;
 
-    private static boolean isInitialized = false;
+    private static boolean initialized = false;
+
+    public static boolean isInitialized() {
+        return initialized;
+    }
 
     private RMIServiceHost() {
     }
@@ -52,11 +56,11 @@ public class RMIServiceHost {
             registry = LocateRegistry.createRegistry(RMI_PORT);
             skeleton = (DirectoryService) UnicastRemoteObject.exportObject(toggleService, RANDOM_PORT_HINT);
             registry.rebind(DirectoryService.REMOTE_OBJECT_NAME, skeleton);
-            isInitialized = true;
-            System.err.println("Object registered in RMI registry");
+            initialized = true;
+            System.err.println("Successfully bound RMI Port " + RMI_PORT);
         } catch (RemoteException ex) {
             if (ex.getCause() instanceof BindException) {
-                System.err.println("Unable to bind RMI Port");
+                System.err.println("Unable to bind RMI Port " + RMI_PORT);
                 return;
             }
             Logger.getLogger(RMIServiceHost.class.getName()).log(Level.SEVERE, null, ex);
@@ -64,7 +68,7 @@ public class RMIServiceHost {
     }
 
     private static void unbindObjects() {
-        if (isInitialized) {
+        if (initialized) {
             try {
                 registry.unbind(DirectoryService.REMOTE_OBJECT_NAME);
                 UnicastRemoteObject.unexportObject(toggleService, true);

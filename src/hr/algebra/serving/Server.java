@@ -25,9 +25,14 @@ import javafx.scene.image.Image;
 public class Server {
 
     public static final int PORT = 12345;
-    public static final String HOST = "localhost";
 
     private static Thread serverThread = null;
+
+    private static boolean initialized = false;
+
+    public static boolean isInitialized() {
+        return initialized;
+    }
 
     public static void startServer() {
         if (serverThread == null) {
@@ -43,6 +48,7 @@ public class Server {
     private static void receiveMessages() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.err.println("Server listening on port: " + serverSocket.getLocalPort());
+            initialized = true;
             while (!Thread.currentThread().isInterrupted()) {
                 Socket clientSocket = serverSocket.accept();
                 System.err.println("Client connected from port:  " + clientSocket.getPort());
@@ -50,6 +56,7 @@ public class Server {
             }
         } catch (BindException ex) {
             System.err.println("Unable to bind TCP Port " + PORT);
+            initialized = false;
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }

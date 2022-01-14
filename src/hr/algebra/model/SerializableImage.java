@@ -5,6 +5,7 @@
  */
 package hr.algebra.model;
 
+import hr.algebra.utils.FileUtils;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -43,6 +44,6 @@ public class SerializableImage implements Serializable {
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
-        ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", s);
+        ImageIO.write(SwingFXUtils.fromFXImage(image, null), FileUtils.Extensions.JPG.toString(), s);
     }
 }

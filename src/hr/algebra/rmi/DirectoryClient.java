@@ -5,45 +5,96 @@
  */
 package hr.algebra.rmi;
 
-import hr.algebra.model.CachedFile;
-import java.awt.Rectangle;
+import hr.algebra.OpenCVCats;
+import hr.algebra.model.CachedResult;
+import hr.algebra.model.Solution;
+import java.io.File;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.util.Pair;
 
 /**
  *
  * @author lcabraja
  */
-public class DirectoryClient {
+public class DirectoryClient implements DirectoryService {
 
     private Registry registry;
     private DirectoryService stub;
+    private boolean initialized = false;
 
     public DirectoryClient() {
+        System.out.println("Locating registry on " + OpenCVCats.getSettings().getDefaultHost() + ":" + RMIServiceHost.RMI_PORT);
         try {
-            System.out.println("Initializing registry");
-            registry = LocateRegistry.getRegistry("localhost", 1099);
-            System.out.println("Initializaing stub");
+            registry = LocateRegistry.getRegistry(OpenCVCats.getSettings().getDefaultHost(), RMIServiceHost.RMI_PORT);
             stub = (DirectoryService) registry.lookup(DirectoryService.REMOTE_OBJECT_NAME);
-            handleRemoteCalls(stub);
-        } catch (RemoteException ex) {
-            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NotBoundException ex) {
+            initialized = true;
+        } catch (RemoteException | NotBoundException ex) {
             Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void handleRemoteCalls(DirectoryService remoteService) throws RemoteException {
-        System.out.println("Calling stub");
-        Pair<CachedFile, Rectangle[]> imageData = remoteService.getImageData();
-        System.out.println("Result: " + imageData);
-        for (Rectangle object : imageData.getValue()) {
-            System.out.println(object);
+    @Override
+    public String getDirectoryPath() {
+        System.out.println("getDirectoryPath @ " + getClass().toString());
+        if (!initialized) {
+            System.out.println("DirectoryClient uninitialized...");
+            return null;
         }
+        try {
+            return stub.getDirectoryPath();
+        } catch (RemoteException ex) {
+            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    @Override
+    public List<File> getFiles() {
+        System.out.println("getFiles @ " + getClass().toString());
+        if (!initialized) {
+            System.out.println("DirectoryClient uninitialized...");
+            return null;
+        }
+        try {
+            return stub.getFiles();
+        } catch (RemoteException ex) {
+            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    @Override
+    public Solution getSolution(CachedResult cr) {
+        System.out.println("getSolution @ " + getClass().toString());
+        if (!initialized) {
+            System.out.println("DirectoryClient uninitialized...");
+            return null;
+        }
+        try {
+            return stub.getSolution(cr);
+        } catch (RemoteException ex) {
+            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    @Override
+    public void setSolution(Solution solution) {
+        System.out.println("setSolution @ " + getClass().toString());
+        if (!initialized) {
+            System.out.println("DirectoryClient uninitialized...");
+            return;
+        }
+        try {
+            stub.setSolution(solution);
+        } catch (RemoteException ex) {
+            Logger.getLogger(DirectoryClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 }

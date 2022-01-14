@@ -15,23 +15,29 @@ import java.util.Optional;
  */
 public class DetailedImageViewHolder {
 
-    private URL returnResource;
-    private File imageFile;
-    private Optional<Object> returnHolder;
+    private final URL returnResource;
+    private final File imageFile;
+    private final SerializableImage image;
+    private final Optional<Object> returnHolder;
 
-    public DetailedImageViewHolder(URL returnResource, File imageFile) {
+    public DetailedImageViewHolder(URL returnResource, File imageFile, SerializableImage image) {
         this.returnResource = returnResource;
         this.imageFile = imageFile;
+        this.image = image;
         this.returnHolder = Optional.empty();
     }
 
-    public DetailedImageViewHolder(URL returnResource, File imageFile, Object returnHolder) {
-        this(returnResource, imageFile);
+    public DetailedImageViewHolder(URL returnResource, File imageFile, SerializableImage image, Object returnHolder) {
+        this.returnResource = returnResource;
+        this.imageFile = imageFile;
+        this.image = image;
         this.returnHolder = Optional.of(returnHolder);
     }
-    
-    public DetailedImageViewHolder(URL returnResource, File imageFile, Optional<Object> returnHolder) {
-        this(returnResource, imageFile);
+
+    public DetailedImageViewHolder(URL returnResource, File imageFile, SerializableImage image, Optional<Object> returnHolder) {
+        this.returnResource = returnResource;
+        this.imageFile = imageFile;
+        this.image = image;
         this.returnHolder = returnHolder;
     }
 
@@ -41,6 +47,10 @@ public class DetailedImageViewHolder {
 
     public File getImageFile() {
         return imageFile;
+    }
+
+    public SerializableImage getImage() {
+        return image;
     }
 
     public Optional<Object> getReturnHolder() {

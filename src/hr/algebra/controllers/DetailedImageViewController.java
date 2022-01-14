@@ -7,34 +7,44 @@ package hr.algebra.controllers;
 
 import hr.algebra.OpenCVCats;
 import hr.algebra.caching.Cache;
+import hr.algebra.model.BulkImageViewHolder;
+import hr.algebra.model.CachedResult;
 import hr.algebra.model.DetailedImageViewHolder;
-import hr.algebra.model.SerializableImage;
-import hr.algebra.serving.Client;
+import hr.algebra.model.Solution;
 import hr.algebra.utils.ColorUtils;
+import hr.algebra.utils.FileUtils;
 import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.ViewUtils;
+import hr.algebra.opencv.CascadeClassifierEnum;
+import hr.algebra.rmi.DirectoryClient;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javax.imageio.ImageIO;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
@@ -51,15 +61,13 @@ import org.opencv.core.Size;
  */
 public class DetailedImageViewController implements Initializable {
 
+    private static final String TEMP_PREFIX = "hr.algebra.controllers";
+
     // -------------------------------------------------------------------------
     // ----------------------------------                                 fields
     // -------------------------------------------------------------------------
     @FXML
     private ImageView originalFrame;
-    @FXML
-    private ImageView modifiedFrameTop;
-    @FXML
-    private ImageView modifiedFrameBottom;
     @FXML
     private Label lbRectangles;
     @FXML
@@ -77,10 +85,16 @@ public class DetailedImageViewController implements Initializable {
     private String faceCascadePath;
     private BufferedImage bufferedImage;
     private File setImage;
-    private Image imageToShow;
+    private Mat frame;
 
-    Rect[] facesArray;
+    private Rect[] facesArray;
+    private List<Boolean> correctangles;
+    private int selectangle = 0;
     private String lastRectColor = null;
+    private CachedResult cr;
+
+    @FXML
+    private ListView<String> lvRectangles;
 
     // -------------------------------------------------------------------------
     // ----------------------------------                                  inits
@@ -88,44 +102,70 @@ public class DetailedImageViewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         System.out.println("initialize @ " + getClass().toString());
-        initFields();
-        test();
+        new Thread(() -> initFields()).start();
+        //test();
     }
 
     private void initFields() {
         holder = ((DetailedImageViewHolder) OpenCVCats.getMainStage().getUserData());
         rbHaar.setToggleGroup(group);
         rbLbp.setToggleGroup(group);
-        rbHaar.setSelected(true);
+        setDefaultRadioButton();
         faceCascade = new CascadeClassifier();
-        radioSelection("resources/haarcascades/haarcascade_frontalcatface.xml"); // selects the haar cascade as the default cascade
+        radioSelection(OpenCVCats.getSettings().getDefaultClassifier().toString());
+        System.out.println("correctangles" + correctangles.size());
+    }
+
+    private void setDefaultRadioButton() {
+        switch (OpenCVCats.getSettings().getDefaultClassifier()) {
+            case HAARCASCADE:
+                rbHaar.selectedProperty().set(true);
+                break;
+            case LBPCASCADE:
+                rbLbp.selectedProperty().set(true);
+                break;
+        }
     }
 
     // -------------------------------------------------------------------------
     // ----------------------------------                              rendering
     // -------------------------------------------------------------------------
-    private void analyzeImage() {
+    // https://stackoverflow.com/questions/19548363/image-saved-in-javafx-as-jpg-is-pink-toned
+    private void fixJpegAlphaChannel() {
         try {
-            setImage = holder.getImageFile();
-            bufferedImage = SwingFXUtils.fromFXImage(new Image(new FileInputStream(setImage)), null);
-            if (bufferedImage != null) {
-                Mat frame = ImageUtils.bufferedImageToMat(bufferedImage);
-                if (cache.contains(setImage, faceCascadePath)) {
-                    Optional<Rect[]> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
-                    if (potentialFaces.isPresent()) {
-                        facesArray = potentialFaces.get();
-                    }
-                } else {
-                    detectRects(frame);
-                    cache.setFaceRects(setImage, facesArray, faceCascadePath);
-                }
-                drawRectangles(frame);
-                imageToShow = ImageUtils.mat2Image(frame);
-                updateImageView(imageToShow);
-                displayStatistics();
-            }
-        } catch (FileNotFoundException ex) {
+            bufferedImage = SwingFXUtils.fromFXImage(holder.getImage().getImage(), null);
+            BufferedImage imageRGB = new BufferedImage(
+                    bufferedImage.getWidth(),
+                    bufferedImage.getHeight(),
+                    BufferedImage.OPAQUE);
+            Graphics2D graphics = imageRGB.createGraphics();
+            graphics.drawImage(bufferedImage, 0, 0, null);
+            File tempFile = File.createTempFile(TEMP_PREFIX, "." + FileUtils.Extensions.JPG.toString());
+            ImageIO.write(imageRGB, "jpg", tempFile);
+            graphics.dispose();
+            bufferedImage = SwingFXUtils.fromFXImage(new Image(new FileInputStream(tempFile)), null);
+        } catch (IOException ex) {
             Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void analyzeImage() {
+        setImage = holder.getImageFile();
+        fixJpegAlphaChannel();
+        if (bufferedImage != null) {
+            frame = ImageUtils.bufferedImageToMat(bufferedImage);
+            Optional<CachedResult> potentialFaces = cache.getFaceRects(setImage, faceCascadePath);
+            if (potentialFaces.isPresent()) {
+                facesArray = potentialFaces.get().getRects();
+                cr = potentialFaces.get();
+            } else {
+                detectRects(frame);
+                cr = cache.setFaceRects(setImage, facesArray, faceCascadePath);
+            }
+            updateRectangleLists();
+            drawRectangles(frame);
+            updateImageView(ImageUtils.mat2Image(frame));
+            displayStatistics();
         }
     }
 
@@ -152,26 +192,54 @@ public class DetailedImageViewController implements Initializable {
     }
 
     private void drawRectangles(Mat frame) {
+        drawRectanglesColored(frame, correctangles);
+    }
+
+    private void drawRectanglesColored(Mat frame, List<Boolean> coloredRects) {
         // draw rectangles
         Scalar color;
         lastRectColor = ColorUtils.getDeterministicColorHex();
-        for (Rect face : facesArray) {
-            color = ColorUtils.hexToScalar(lastRectColor);
+        for (int i = 0; i < facesArray.length; i++) {
+            try {
+                color = (coloredRects != null && coloredRects.get(i)) ? ColorUtils.hexToScalar(lastRectColor) : ColorUtils.GRAY.getScalarValue();
+            } catch (IndexOutOfBoundsException ex) {
+                color = ColorUtils.hexToScalar(lastRectColor);
+            }
             lastRectColor = ColorUtils.getDeterministicColorHex(lastRectColor);
-            Imgproc.rectangle(frame, face.tl(), face.br(), color, 3);
+            Imgproc.rectangle(frame, facesArray[i].tl(), facesArray[i].br(), color, 3);
         }
     }
 
+    private void updateRectangleLists() {
+        this.correctangles = new ArrayList<>();
+        List<String> faceList = new ArrayList<>();
+        Rect temp;
+        for (int i = 0; i < facesArray.length; i++) {
+            temp = facesArray[i];
+            faceList.add(i + ". " + temp.width + "x" + temp.height);
+            correctangles.add(Boolean.TRUE);
+        }
+        ObservableList<String> oblist = FXCollections.observableList(faceList);
+        lvRectangles.setItems(oblist);
+    }
+
     private void displayStatistics() {
-        switch (facesArray.length) {
+        int count = (int) correctangles.stream().filter(value -> value).count();
+        switch (count) {
             case 0:
-                lbRectangles.setText("Detected no cats");
+                Platform.runLater(() -> {
+                    lbRectangles.textProperty().set("Detected no cats");
+                });
                 break;
             case 1:
-                lbRectangles.setText("Detected 1 cat");
+                Platform.runLater(() -> {
+                    lbRectangles.textProperty().set("Detected 1 cat");
+                });
                 break;
             default:
-                lbRectangles.setText(String.format("Detected %d cats", facesArray.length));
+                Platform.runLater(() -> {
+                    lbRectangles.textProperty().set(String.format("Detected %d cats", count));
+                });
                 break;
         }
     }
@@ -184,6 +252,35 @@ public class DetailedImageViewController implements Initializable {
     // -------------------------------------------------------------------------
     // ----------------------------------                                UI code
     // -------------------------------------------------------------------------
+    @FXML
+    private void lvRectanglesClicked(MouseEvent event) {
+        this.selectangle = lvRectangles.getSelectionModel().getSelectedIndex();
+    }
+
+    @FXML
+    private void saveSolution(ActionEvent event) {
+        Solution solution = new Solution(facesArray, correctangles, cr);
+        if (holder.getReturnHolder().isPresent() && ((BulkImageViewHolder) holder.getReturnHolder().get()).isOnline()) {
+            new DirectoryClient().setSolution(solution);
+        } else {
+            OpenCVCats.cache.setSolution(solution);
+        }
+    }
+
+    @FXML
+    private void toggleRectangle() {
+        if (selectangle >= 0 && selectangle < facesArray.length) {
+            try {
+                correctangles.set(this.selectangle, !correctangles.get(this.selectangle));
+                drawRectangles(frame);
+                updateImageView(ImageUtils.mat2Image(frame));
+                displayStatistics();
+            } catch (IndexOutOfBoundsException ex) {
+                System.err.println("Missing face index: " + this.selectangle);
+            }
+        }
+    }
+
     @FXML
     private void goBack() throws IOException {
         System.out.println("goBack @ " + getClass().toString());
@@ -199,7 +296,7 @@ public class DetailedImageViewController implements Initializable {
         if (rbLbp.isSelected()) {
             rbLbp.setSelected(false);
         }
-        radioSelection("resources/haarcascades/haarcascade_frontalcatface.xml");
+        radioSelection(CascadeClassifierEnum.HAARCASCADE.toString());
     }
 
     @FXML
@@ -208,7 +305,7 @@ public class DetailedImageViewController implements Initializable {
         if (rbHaar.isSelected()) {
             rbHaar.setSelected(false);
         }
-        radioSelection("resources/lbpcascades/lbpcascade_frontalcatface.xml");
+        radioSelection(CascadeClassifierEnum.LBPCASCADE.toString());
     }
 
     private void radioSelection(String classifierPath) {
@@ -216,34 +313,5 @@ public class DetailedImageViewController implements Initializable {
         faceCascadePath = classifierPath;
         faceCascade.load(classifierPath);
         analyzeImage();
-    }
-
-    private static final String FILE_NAME = "image.ser";
-
-    private void test() {
-        // Test of read/write serialized image to file
-        SerializableImage si = new SerializableImage(imageToShow);
-        try {
-            write(si, FILE_NAME);
-            SerializableImage image = read(FILE_NAME);
-            ImageUtils.onFXThread(modifiedFrameBottom.imageProperty(), image.getImage());
-
-        } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(DetailedImageViewController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        // Test of read/write serialized image over network
-        Client.requestImage(setImage, modifiedFrameTop.imageProperty());
-    }
-
-    private static void write(SerializableImage image, String fileName) throws IOException {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) { // decorator -> explain
-            oos.writeObject(image);
-        }
-    }
-
-    private static SerializableImage read(String fileName) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
-            return (SerializableImage) ois.readObject();
-        }
     }
 }

@@ -13,7 +13,19 @@ import org.opencv.core.Scalar;
  *
  * @author lcabraja
  */
-public class ColorUtils {
+public enum ColorUtils {
+
+    RED("ff0000"), GREEN("00ff00"), BLUE("0000ff"), WHITE("ffffff"), GRAY("444444"), BLACK("000000");
+
+    private final Scalar color;
+
+    ColorUtils(String hexcode) {
+        this.color = hexToScalar(hexcode);
+    }
+
+    public Scalar getScalarValue() {
+        return this.color;
+    }
 
     private static final Random R = new Random();
     private static final String[] STATIC_COLOR_LIST = {

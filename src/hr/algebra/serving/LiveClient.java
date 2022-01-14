@@ -5,12 +5,11 @@
  */
 package hr.algebra.serving;
 
+import hr.algebra.OpenCVCats;
 import hr.algebra.model.SerializableImage;
 import hr.algebra.utils.ImageUtils;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,7 +30,7 @@ public class LiveClient {
     }
 
     private static void sendImageThread(ObjectProperty<Image> canvas) {
-        try (Socket clientSocket = new Socket(LiveServer.HOST, LiveServer.PORT)) {
+        try (Socket clientSocket = new Socket(OpenCVCats.getSettings().getDefaultHost(), LiveServer.PORT)) {
             System.err.println("Client connecting onto: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
             send(clientSocket, canvas);
         } catch (IOException ex) {
