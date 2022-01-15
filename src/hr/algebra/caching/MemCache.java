@@ -7,7 +7,6 @@ package hr.algebra.caching;
 
 import hr.algebra.model.CachedResult;
 import hr.algebra.model.Solution;
-import hr.algebra.utils.CollectionUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;

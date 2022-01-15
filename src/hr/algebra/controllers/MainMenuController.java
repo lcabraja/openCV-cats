@@ -14,7 +14,6 @@ import hr.algebra.rmi.DirectoryClient;
 import hr.algebra.threading.ThreadHelper;
 import hr.algebra.utils.DocumentationUtils;
 import hr.algebra.utils.FileUtils;
-import hr.algebra.utils.ImageUtils;
 import hr.algebra.utils.JNDIUtils;
 import hr.algebra.utils.SerializationUtils;
 import hr.algebra.utils.ViewUtils;

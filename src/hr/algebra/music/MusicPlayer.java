@@ -5,7 +5,6 @@
  */
 package hr.algebra.music;
 
-import java.net.URISyntaxException;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
