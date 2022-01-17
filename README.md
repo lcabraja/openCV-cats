@@ -16,10 +16,12 @@ Each subsequent instance defines itself as the client, and will ping the server 
 ### TODO
 - Neutral
   - [ ] Displaying a results as done
-  - [ ] Settings pane
+  - [x] Settings pane
 - Server
-  - [ ] Sharing directories
+  - [x] Sharing directories
   - [ ] Receiving results
 - Client
-  - [ ] Storing directory structure
+  - [x] Storing directory structure
   - [ ] Sending results
+
+This project will not be iterated further.
