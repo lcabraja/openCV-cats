@@ -1,4 +1,4 @@
-# Java programming 2 <br> Programiranje u Javi 2
+# Programiranje u Javi 2 <br> Java programming 2
 5th Semester @ [Algebra University College](https://www.algebra.hr/visoko-uciliste/en/)
 
 ## JAVA2 Project - Detection of cat faces in images using ML
