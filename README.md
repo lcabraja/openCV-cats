@@ -1,5 +1,7 @@
-# JAVA2 Project - Detection of cat faces in images using ML
-## Algebra University College | Semester 5
+# Java programming 2 <br> Programiranje u Javi 2
+5th Semester @ [Algebra University College](https://www.algebra.hr/visoko-uciliste/en/)
+
+## JAVA2 Project - Detection of cat faces in images using ML
 
 ### Langauge + Libraries
 Java
